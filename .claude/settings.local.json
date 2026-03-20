@@ -26,7 +26,9 @@
       "Bash(npm run:*)",
       "Bash(npm install:*)",
       "Bash(git merge:*)",
-      "Bash(git stash:*)"
+      "Bash(git stash:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx vite:*)"
     ]
   },
   "enableAllProjectMcpServers": true,
