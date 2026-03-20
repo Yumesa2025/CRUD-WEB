@@ -17,16 +17,15 @@ function IndexPage() {
 
   return (
     <div>
-      <h1
-        className={css({
-          fontSize: '2xl',
-          fontWeight: 'bold',
-          color: 'gray.900',
-          mb: '6',
-        })}
-      >
-        게시글 목록
-      </h1>
+      {/* 헤더 */}
+      <div className={css({ mb: '8' })}>
+        <h1 className={css({ fontSize: '2xl', fontWeight: 'bold', color: 'gray.900', mb: '1' })}>
+          게시글
+        </h1>
+        <p className={css({ fontSize: 'sm', color: 'gray.400' })}>
+          {posts ? `${posts.length}개의 글이 있습니다` : '글을 불러오는 중...'}
+        </p>
+      </div>
 
       {isLoading && <PostListSkeleton />}
       {isError && <PostListError onRetry={() => void refetch()} />}
@@ -51,7 +50,8 @@ function IndexPage() {
             fontWeight: 'medium',
             fontSize: 'sm',
             boxShadow: '0 4px 16px rgba(59,130,246,0.35)',
-            _hover: { bg: 'brand.600' },
+            _hover: { bg: 'brand.600', transform: 'translateY(-1px)' },
+            transition: 'all 0.15s',
           })}
         >
           <PenLine size={17} />
