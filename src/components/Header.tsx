@@ -1,5 +1,5 @@
 import { Link, useNavigate } from '@tanstack/react-router';
-import { LogIn, LogOut, PenLine } from 'lucide-react';
+import { LogIn, LogOut, PenLine, UserCircle } from 'lucide-react';
 import { css } from 'styled-system/css';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -69,6 +69,26 @@ export function Header() {
               >
                 <PenLine size={15} />
                 글쓰기
+              </Link>
+              <Link
+                to="/profile"
+                className={css({
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '1',
+                  px: '4',
+                  py: '2',
+                  border: '1px solid token(colors.brand.100)',
+                  color: 'brand.600',
+                  borderRadius: 'md',
+                  textDecoration: 'none',
+                  fontSize: 'sm',
+                  fontWeight: 'medium',
+                  _hover: { bg: 'brand.50' },
+                })}
+              >
+                <UserCircle size={15} />
+                프로필
               </Link>
               <button
                 onClick={handleSignOut}
