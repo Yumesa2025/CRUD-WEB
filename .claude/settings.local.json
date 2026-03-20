@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(update-config)",
+      "Bash(npx --version)",
+      "Bash(npx -y @supabase/mcp-server-supabase@latest --help)",
+      "Bash(claude mcp:*)",
+      "mcp__supabase__list_projects",
+      "mcp__supabase__apply_migration",
+      "mcp__supabase__generate_typescript_types",
+      "mcp__supabase__execute_sql",
+      "Bash(cmd.exe /c \"netstat -aon | findstr :5173\")",
+      "Bash(cmd.exe /c \"taskkill /F /IM node.exe /T\")",
+      "Bash(cmd.exe /c \"tasklist | findstr node\")",
+      "Bash(echo \"=== service: supabase calls ===\" grep -c \"supabase\\\\.\" /c/ToyProject/src/services/posts.service.ts __NEW_LINE_8d058abf14165419__ echo \"=== hooks: queryKey patterns ===\" grep \"queryKey:\" /c/ToyProject/src/hooks/usePosts.ts __NEW_LINE_8d058abf14165419__ echo \"=== schema: min/max ===\" grep \"min\\\\|max\" /c/ToyProject/src/types/post.schema.ts __NEW_LINE_8d058abf14165419__ echo \"=== index: skeleton/error/list ===\" grep \"PostListSkeleton\\\\|PostListError\\\\|PostList\" /c/ToyProject/src/routes/index.tsx __NEW_LINE_8d058abf14165419__ echo \"=== new.tsx: zodResolver + mutateAsync ===\" grep \"zodResolver\\\\|mutateAsync\\\\|isPending\" /c/ToyProject/src/routes/posts/new.tsx __NEW_LINE_8d058abf14165419__ echo \"=== postId/index: isOwner + showConfirm ===\" grep \"isOwner\\\\|showConfirm\\\\|deletePost\\\\|motion\" \"/c/ToyProject/src/routes/posts/$postId/index.tsx\")",
+      "mcp__supabase__deploy_edge_function",
+      "mcp__ide__getDiagnostics",
+      "mcp__supabase__get_logs",
+      "Bash(git init:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "supabase"
+  ]
+}

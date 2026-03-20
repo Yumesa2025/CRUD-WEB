@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+styled-system/       # Panda CSS codegen 결과물
+
+# TanStack Router 자동 생성
+src/routeTree.gen.ts
+
+# Environment
+.env.local
+.env.*.local
+
+# MCP (contains personal access tokens)
+.mcp.json
+
+# Editor
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test
+/test-results/
+/playwright-report/
+/playwright/.cache/
