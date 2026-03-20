@@ -47,6 +47,21 @@ function PostDetailPage() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
+      {post.thumbnail_url && (
+        <img
+          src={post.thumbnail_url}
+          alt={post.title}
+          className={css({
+            w: 'full',
+            maxH: '400px',
+            objectFit: 'cover',
+            borderRadius: 'xl',
+            mb: '8',
+            display: 'block',
+          })}
+        />
+      )}
+
       <div className={css({ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: '6' })}>
         <h1 className={css({ fontSize: '2xl', fontWeight: 'bold', color: 'gray.900' })}>
           {post.title}

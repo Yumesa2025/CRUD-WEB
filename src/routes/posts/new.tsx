@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { css, cx } from 'styled-system/css';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
+import { ThumbnailUploader } from '@/components/ThumbnailUploader';
 import { useCreatePost } from '@/hooks/usePosts';
 import { postFormSchema, type PostFormValues } from '@/types/post.schema';
 import { AiAssistButton } from '@/features/ai/components/AiAssistButton';
@@ -22,6 +24,8 @@ function PostsNewPage() {
 function PostsNewForm() {
   const navigate = useNavigate();
   const { mutateAsync, isPending } = useCreatePost();
+  const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
+
   const {
     register,
     handleSubmit,
@@ -31,7 +35,7 @@ function PostsNewForm() {
   } = useForm<PostFormValues>({ resolver: zodResolver(postFormSchema) });
 
   const onSubmit = async (values: PostFormValues) => {
-    const post = await mutateAsync(values);
+    const post = await mutateAsync({ ...values, thumbnail_url: thumbnailUrl });
     void navigate({ to: '/posts/$postId', params: { postId: post.id } });
   };
 
@@ -89,6 +93,8 @@ function PostsNewForm() {
             onApply={(text) => setValue('content', text, { shouldValidate: true })}
           />
         </div>
+
+        <ThumbnailUploader value={thumbnailUrl} onChange={setThumbnailUrl} />
 
         <button
           type="submit"

@@ -103,11 +103,19 @@ export function PostList({ posts }: PostListProps) {
                 },
               })}
             >
-              {/* 상단 컬러 액센트 바 */}
-              <div
-                style={{ background: accent }}
-                className={css({ h: '4px', w: 'full', flexShrink: '0' })}
-              />
+              {/* 썸네일 또는 컬러 액센트 바 */}
+              {post.thumbnail_url ? (
+                <img
+                  src={post.thumbnail_url}
+                  alt={post.title}
+                  className={css({ w: 'full', h: '160px', objectFit: 'cover', display: 'block', flexShrink: '0' })}
+                />
+              ) : (
+                <div
+                  style={{ background: accent }}
+                  className={css({ h: '4px', w: 'full', flexShrink: '0' })}
+                />
+              )}
 
               {/* 본문 영역 */}
               <div className={css({ p: '5', display: 'flex', flexDirection: 'column', flex: '1' })}>
