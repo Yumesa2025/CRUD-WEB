@@ -8,10 +8,12 @@ export interface PostsPage {
   nextPage: number | null;
 }
 
+const POST_SELECT = 'id, user_id, title, content, thumbnail_url, created_at, updated_at, profiles(username, avatar_url)';
+
 export async function getPosts(): Promise<Post[]> {
   const { data, error } = await supabase
     .from('posts')
-    .select('*, profiles(username, avatar_url)')
+    .select(POST_SELECT)
     .order('created_at', { ascending: false });
 
   if (error) throw error;
@@ -24,7 +26,7 @@ export async function getPostsPage(page: number, limit = POSTS_PER_PAGE): Promis
 
   const { data, error } = await supabase
     .from('posts')
-    .select('*, profiles(username, avatar_url)')
+    .select(POST_SELECT)
     .order('created_at', { ascending: false })
     .range(from, to);
 
@@ -43,7 +45,7 @@ export async function searchPosts(
 
   const { data, error } = await supabase
     .from('posts')
-    .select('*, profiles(username, avatar_url)')
+    .select(POST_SELECT)
     .textSearch('fts', query, { type: 'websearch', config: 'simple' })
     .order('created_at', { ascending: false })
     .range(from, to);
@@ -56,7 +58,7 @@ export async function searchPosts(
 export async function getPost(id: string): Promise<Post> {
   const { data, error } = await supabase
     .from('posts')
-    .select('*, profiles(username, avatar_url)')
+    .select(POST_SELECT)
     .eq('id', id)
     .single();
 

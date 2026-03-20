@@ -51,9 +51,8 @@ function LoginPage() {
     const { error } = await signInWithEmail(email, password);
     if (error) {
       setError('root', { message: '이메일 또는 비밀번호가 올바르지 않습니다' });
-      return;
     }
-    void navigate({ to: '/' });
+    // navigate는 useEffect에서 user 상태 변경 시 처리
   };
 
   const inputBase = css({
