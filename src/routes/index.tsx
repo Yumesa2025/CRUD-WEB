@@ -1,35 +1,103 @@
+import { useEffect, useRef } from 'react';
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { PenLine } from 'lucide-react';
+import { useAtomValue } from 'jotai';
+import { motion } from 'framer-motion';
+import { Loader2, PenLine } from 'lucide-react';
 import { css } from 'styled-system/css';
 import { useAuth } from '@/hooks/useAuth';
-import { usePosts } from '@/hooks/usePosts';
+import { useInfinitePosts, useSearchPosts } from '@/hooks/usePosts';
 import { PostList } from '@/features/board/components/PostList';
 import { PostListError } from '@/features/board/components/PostList.error';
 import { PostListSkeleton } from '@/features/board/components/PostList.skeleton';
+import { searchQueryAtom } from '@/stores/uiStore';
 
 export const Route = createFileRoute('/')({
   component: IndexPage,
 });
 
 function IndexPage() {
-  const { data: posts, isLoading, isError, refetch } = usePosts();
   const { user } = useAuth();
+  const query = useAtomValue(searchQueryAtom);
+
+  const infiniteResult = useInfinitePosts();
+  const searchResult = useSearchPosts(query);
+
+  const active = query ? searchResult : infiniteResult;
+  const posts = active.data?.pages.flatMap((p) => p.data) ?? [];
+  const totalCount = posts.length;
+
+  // Intersection Observer sentinel
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && active.hasNextPage && !active.isFetchingNextPage) {
+          void active.fetchNextPage();
+        }
+      },
+      { threshold: 0.1 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [active]);
+
+  const isLoading = active.isLoading;
+  const isError = active.isError;
 
   return (
     <div>
       {/* 헤더 */}
       <div className={css({ mb: '8' })}>
         <h1 className={css({ fontSize: '2xl', fontWeight: 'bold', color: 'gray.900', mb: '1' })}>
-          게시글
+          {query ? `"${query}" 검색 결과` : '게시글'}
         </h1>
         <p className={css({ fontSize: 'sm', color: 'gray.400' })}>
-          {posts ? `${posts.length}개의 글이 있습니다` : '글을 불러오는 중...'}
+          {isLoading
+            ? '불러오는 중...'
+            : query
+              ? `${totalCount}개의 결과`
+              : `${totalCount}개의 글`}
         </p>
       </div>
 
       {isLoading && <PostListSkeleton />}
-      {isError && <PostListError onRetry={() => void refetch()} />}
-      {posts && <PostList posts={posts} />}
+      {isError && <PostListError onRetry={() => void active.refetch()} />}
+
+      {!isLoading && !isError && (
+        <>
+          {posts.length === 0 && query ? (
+            <div className={css({ py: '20', textAlign: 'center', color: 'gray.400', fontSize: 'sm' })}>
+              검색 결과가 없습니다.
+            </div>
+          ) : (
+            <PostList posts={posts} />
+          )}
+        </>
+      )}
+
+      {/* 추가 로딩 스피너 */}
+      {active.isFetchingNextPage && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className={css({ display: 'flex', justifyContent: 'center', py: '8' })}
+        >
+          <Loader2 size={24} className={css({ color: 'brand.400', animation: 'spin 1s linear infinite' })} />
+        </motion.div>
+      )}
+
+      {/* 끝 메시지 */}
+      {!active.hasNextPage && posts.length > 0 && !active.isFetchingNextPage && (
+        <p className={css({ textAlign: 'center', fontSize: 'sm', color: 'gray.400', py: '8' })}>
+          모든 게시글을 읽었습니다.
+        </p>
+      )}
+
+      {/* Intersection Observer 센티넬 */}
+      <div ref={sentinelRef} className={css({ h: '1px' })} />
 
       {user && (
         <Link

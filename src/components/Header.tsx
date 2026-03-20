@@ -2,6 +2,7 @@ import { Link, useNavigate } from '@tanstack/react-router';
 import { LogIn, LogOut, PenLine, UserCircle } from 'lucide-react';
 import { css } from 'styled-system/css';
 import { useAuth } from '@/hooks/useAuth';
+import { SearchBar } from '@/components/SearchBar';
 
 export function Header() {
   const { user, signOut } = useAuth();
@@ -48,6 +49,7 @@ export function Header() {
         </Link>
 
         <nav className={css({ display: 'flex', gap: '2', alignItems: 'center' })}>
+          <SearchBar />
           {user ? (
             <>
               <Link

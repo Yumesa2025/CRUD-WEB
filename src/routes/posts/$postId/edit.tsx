@@ -1,9 +1,10 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { css, cx } from 'styled-system/css';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
+import { ThumbnailUploader } from '@/components/ThumbnailUploader';
 import { useAuth } from '@/hooks/useAuth';
 import { usePost, useUpdatePost } from '@/hooks/usePosts';
 import { postFormSchema, type PostFormValues } from '@/types/post.schema';
@@ -27,6 +28,7 @@ function PostEditForm() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { mutateAsync, isPending } = useUpdatePost();
+  const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
 
   const {
     register,
@@ -38,7 +40,10 @@ function PostEditForm() {
   } = useForm<PostFormValues>({ resolver: zodResolver(postFormSchema) });
 
   useEffect(() => {
-    if (post) reset({ title: post.title, content: post.content });
+    if (post) {
+      reset({ title: post.title, content: post.content });
+      setThumbnailUrl(post.thumbnail_url ?? null);
+    }
   }, [post, reset]);
 
   useEffect(() => {
@@ -48,7 +53,7 @@ function PostEditForm() {
   }, [post, user, navigate]);
 
   const onSubmit = async (values: PostFormValues) => {
-    await mutateAsync({ id: postId, ...values });
+    await mutateAsync({ id: postId, ...values, thumbnail_url: thumbnailUrl });
     void navigate({ to: '/posts/$postId', params: { postId } });
   };
 
@@ -138,6 +143,8 @@ function PostEditForm() {
             onApply={(text) => setValue('content', text, { shouldValidate: true })}
           />
         </div>
+
+        <ThumbnailUploader value={thumbnailUrl} onChange={setThumbnailUrl} />
 
         <button
           type="submit"

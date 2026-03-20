@@ -18,6 +18,7 @@ export interface Post {
   user_id: string;
   title: string;
   content: string;
+  thumbnail_url: string | null;
   created_at: string;
   updated_at: string;
   profiles: { username: string; avatar_url: string | null } | null;
