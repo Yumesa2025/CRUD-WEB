@@ -69,9 +69,7 @@ export function PostList({ posts }: PostListProps) {
                 color: 'gray.500',
                 mb: '4',
                 overflow: 'hidden',
-                display: '-webkit-box',
-                WebkitBoxOrient: 'vertical',
-                WebkitLineClamp: '2',
+                lineClamp: '2',
               })}
             >
               {post.content}

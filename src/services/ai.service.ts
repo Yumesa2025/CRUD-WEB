@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/supabase';
 
-export type AiMode = 'improve' | 'summarize';
+export type AiMode = 'improve' | 'summarize' | 'write';
 
 export async function aiAssist(text: string, mode: AiMode): Promise<string> {
   const { data: { session } } = await supabase.auth.getSession();

@@ -12,17 +12,30 @@ const ICONS = {
   info: Info,
 };
 
-const COLORS = {
-  success: { bg: 'green.50', border: 'green.200', icon: 'var(--colors-green-500)', text: 'green.800' },
-  error:   { bg: 'red.50',   border: 'red.200',   icon: 'var(--colors-red-500)',   text: 'red.800'   },
-  warning: { bg: 'yellow.50',border: 'yellow.200',icon: 'var(--colors-yellow-500)',text: 'yellow.800'},
-  info:    { bg: 'blue.50',  border: 'blue.200',  icon: 'var(--colors-blue-500)',  text: 'blue.800'  },
-};
-
 function ToastItem({ toast }: { toast: Toast }) {
   const remove = useSetAtom(removeToastAtom);
   const Icon = ICONS[toast.variant];
-  const colors = COLORS[toast.variant];
+
+  const variantStyle = {
+    success: css({ bg: 'green.50', borderColor: 'green.200' }),
+    error:   css({ bg: 'red.50',   borderColor: 'red.200'   }),
+    warning: css({ bg: 'yellow.50',borderColor: 'yellow.200'}),
+    info:    css({ bg: 'blue.50',  borderColor: 'blue.200'  }),
+  }[toast.variant];
+
+  const iconColor = {
+    success: 'var(--colors-green-500)',
+    error:   'var(--colors-red-500)',
+    warning: 'var(--colors-yellow-500)',
+    info:    'var(--colors-blue-500)',
+  }[toast.variant];
+
+  const titleColor = {
+    success: css({ color: 'green.800' }),
+    error:   css({ color: 'red.800'   }),
+    warning: css({ color: 'yellow.800'}),
+    info:    css({ color: 'blue.800'  }),
+  }[toast.variant];
 
   useEffect(() => {
     const timer = setTimeout(() => remove(toast.id), toast.duration ?? 3000);
@@ -46,13 +59,11 @@ function ToastItem({ toast }: { toast: Toast }) {
         borderRadius: 'lg',
         border: '1px solid',
         boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
-        bg: colors.bg as Parameters<typeof css>[0]['bg'],
-        borderColor: colors.border as Parameters<typeof css>[0]['borderColor'],
-      })}
+      }) + ' ' + variantStyle}
     >
-      <Icon size={18} color={colors.icon} style={{ flexShrink: 0, marginTop: 1 }} />
+      <Icon size={18} color={iconColor} style={{ flexShrink: 0, marginTop: 1 }} />
       <div className={css({ flex: '1', minW: '0' })}>
-        <p className={css({ fontSize: 'sm', fontWeight: 'semibold', color: colors.text as Parameters<typeof css>[0]['color'] })}>
+        <p className={css({ fontSize: 'sm', fontWeight: 'semibold' }) + ' ' + titleColor}>
           {toast.title}
         </p>
         {toast.description && (

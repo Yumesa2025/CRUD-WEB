@@ -49,7 +49,7 @@ function PostEditForm() {
 
   const onSubmit = async (values: PostFormValues) => {
     await mutateAsync({ id: postId, ...values });
-    void navigate({ to: '/posts/$postId/', params: { postId } });
+    void navigate({ to: '/posts/$postId', params: { postId } });
   };
 
   if (isLoading) {

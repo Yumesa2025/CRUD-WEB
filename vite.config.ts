@@ -1,13 +1,14 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { TanStackRouterVite } from '@tanstack/router-plugin/vite';
+import { visualizer } from 'rollup-plugin-visualizer';
 import path from 'path';
 
 export default defineConfig({
   plugins: [
-    // TanStack Router: src/routes/ 파일 기반으로 routeTree.gen.ts 자동 생성
     TanStackRouterVite(),
     react(),
+    visualizer({ filename: 'dist/stats.html', open: false, gzipSize: true }),
   ],
   resolve: {
     alias: {
@@ -17,5 +18,17 @@ export default defineConfig({
   },
   server: {
     port: 5173,
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          router: ['@tanstack/react-router'],
+          query: ['@tanstack/react-query', 'jotai'],
+          framer: ['framer-motion'],
+        },
+      },
+    },
   },
 });
