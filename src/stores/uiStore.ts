@@ -60,3 +60,8 @@ export const addToastAtom = atom(
 export const removeToastAtom = atom(null, (_get, set, id: string) => {
   set(toastsAtom, (prev) => prev.filter((t) => t.id !== id));
 });
+
+// ─── Search ──────────────────────────────────────────────────────────────────
+
+/** 검색어 상태 */
+export const searchQueryAtom = atom('');
