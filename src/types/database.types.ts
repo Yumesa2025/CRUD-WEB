@@ -18,7 +18,9 @@ export type Database = {
         Row: {
           content: string
           created_at: string
+          fts: unknown
           id: string
+          thumbnail_url: string | null
           title: string
           updated_at: string
           user_id: string
@@ -26,7 +28,9 @@ export type Database = {
         Insert: {
           content: string
           created_at?: string
+          fts?: unknown
           id?: string
+          thumbnail_url?: string | null
           title: string
           updated_at?: string
           user_id: string
@@ -34,12 +38,22 @@ export type Database = {
         Update: {
           content?: string
           created_at?: string
+          fts?: unknown
           id?: string
+          thumbnail_url?: string | null
           title?: string
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "posts_user_id_profiles_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
