@@ -38,7 +38,7 @@ test.describe('게시글 CRUD', () => {
     await firstPost.click();
 
     // 수정 버튼 클릭
-    const editBtn = page.getByRole('link', { name: '수정' });
+    const editBtn = page.getByRole('button', { name: '수정' });
     if (!(await editBtn.isVisible())) {
       test.skip(true, '본인 글이 없어서 수정 테스트 스킵');
       return;
@@ -83,7 +83,7 @@ test.describe('게시글 CRUD', () => {
 
     await firstPost.click();
     // 비로그인이므로 수정/삭제 버튼 없어야 함
-    await expect(page.getByRole('link', { name: '수정' })).not.toBeVisible();
+    await expect(page.getByRole('button', { name: '수정' })).not.toBeVisible();
     await expect(page.getByRole('button', { name: '삭제' })).not.toBeVisible();
   });
 });
