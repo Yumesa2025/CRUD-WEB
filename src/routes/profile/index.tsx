@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -24,6 +24,9 @@ const profileSchema = z.object({
 });
 type ProfileFormValues = z.infer<typeof profileSchema>;
 
+const AVATAR_ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
+const AVATAR_MAX_SIZE = 5 * 1024 * 1024; // 5MB
+
 function ProfileContent() {
   const { user } = useAuth();
   const addToast = useSetAtom(addToastAtom);
@@ -38,11 +41,19 @@ function ProfileContent() {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors, isDirty },
   } = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
-    values: { username: profile?.username ?? '' },
+    defaultValues: { username: '' },
   });
+
+  // profile.id 기준으로 1회만 reset — 이후 백그라운드 refetch 에서 입력값을 덮어쓰지 않음
+  useEffect(() => {
+    if (profile) {
+      reset({ username: profile.username });
+    }
+  }, [profile?.id, reset]);
 
   function handleAvatarClick() {
     fileInputRef.current?.click();
@@ -51,6 +62,18 @@ function ProfileContent() {
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file || !user) return;
+
+    const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
+    if (!AVATAR_ALLOWED_EXTENSIONS.includes(ext)) {
+      addToast({ variant: 'error', title: `지원하지 않는 파일 형식입니다. (${AVATAR_ALLOWED_EXTENSIONS.join(', ')} 만 허용)` });
+      e.target.value = '';
+      return;
+    }
+    if (file.size > AVATAR_MAX_SIZE) {
+      addToast({ variant: 'error', title: '파일 크기는 5MB 이하여야 합니다.' });
+      e.target.value = '';
+      return;
+    }
 
     // preview
     const reader = new FileReader();
@@ -187,7 +210,7 @@ function ProfileContent() {
             <input
               ref={fileInputRef}
               type="file"
-              accept="image/*"
+              accept=".jpg,.jpeg,.png,.webp,.gif"
               className={css({ display: 'none' })}
               onChange={(e) => void handleFileChange(e)}
             />

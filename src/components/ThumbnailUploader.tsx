@@ -1,11 +1,14 @@
 import { useRef, useState } from 'react';
 import { ImagePlus, X } from 'lucide-react';
 import { css } from 'styled-system/css';
-import { uploadPostImage } from '@/services/posts.service';
+import { uploadPostImage, type UploadResult } from '@/services/posts.service';
+
+const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
 interface ThumbnailUploaderProps {
   value: string | null;
-  onChange: (url: string | null) => void;
+  onChange: (value: UploadResult | null) => void;
 }
 
 export function ThumbnailUploader({ value, onChange }: ThumbnailUploaderProps) {
@@ -14,11 +17,20 @@ export function ThumbnailUploader({ value, onChange }: ThumbnailUploaderProps) {
   const [isDragging, setIsDragging] = useState(false);
 
   const handleFile = async (file: File) => {
-    if (!file.type.startsWith('image/')) return;
+    const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
+    if (!ALLOWED_EXTENSIONS.includes(ext)) {
+      alert(`지원하지 않는 파일 형식입니다. (${ALLOWED_EXTENSIONS.join(', ')} 만 허용)`);
+      return;
+    }
+    if (file.size > MAX_FILE_SIZE) {
+      alert('파일 크기는 5MB 이하여야 합니다.');
+      return;
+    }
+
     setIsUploading(true);
     try {
-      const url = await uploadPostImage(file);
-      onChange(url);
+      const result = await uploadPostImage(file);
+      onChange(result);
     } finally {
       setIsUploading(false);
     }
@@ -101,7 +113,7 @@ export function ThumbnailUploader({ value, onChange }: ThumbnailUploaderProps) {
               <p className={css({ fontSize: 'sm', color: 'gray.500' })}>
                 클릭하거나 이미지를 드래그하세요
               </p>
-              <p className={css({ fontSize: 'xs', color: 'gray.400' })}>JPG, PNG, WEBP 지원</p>
+              <p className={css({ fontSize: 'xs', color: 'gray.400' })}>JPG, PNG, WEBP, GIF (최대 5MB)</p>
             </>
           )}
         </div>
@@ -110,7 +122,7 @@ export function ThumbnailUploader({ value, onChange }: ThumbnailUploaderProps) {
       <input
         ref={inputRef}
         type="file"
-        accept="image/*"
+        accept=".jpg,.jpeg,.png,.webp,.gif"
         onChange={handleChange}
         className={css({ display: 'none' })}
       />
