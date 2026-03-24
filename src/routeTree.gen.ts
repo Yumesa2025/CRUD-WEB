@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProfileIndexRouteImport } from './routes/profile/index'
+import { Route as ProfileUserIdRouteImport } from './routes/profile/$userId'
 import { Route as PostsNewRouteImport } from './routes/posts/new'
 import { Route as AuthSignupRouteImport } from './routes/auth/signup'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
@@ -26,6 +27,11 @@ const IndexRoute = IndexRouteImport.update({
 const ProfileIndexRoute = ProfileIndexRouteImport.update({
   id: '/profile/',
   path: '/profile/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileUserIdRoute = ProfileUserIdRouteImport.update({
+  id: '/profile/$userId',
+  path: '/profile/$userId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PostsNewRoute = PostsNewRouteImport.update({
@@ -65,6 +71,7 @@ export interface FileRoutesByFullPath {
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
   '/posts/new': typeof PostsNewRoute
+  '/profile/$userId': typeof ProfileUserIdRoute
   '/profile/': typeof ProfileIndexRoute
   '/posts/$postId/edit': typeof PostsPostIdEditRoute
   '/posts/$postId/': typeof PostsPostIdIndexRoute
@@ -75,6 +82,7 @@ export interface FileRoutesByTo {
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
   '/posts/new': typeof PostsNewRoute
+  '/profile/$userId': typeof ProfileUserIdRoute
   '/profile': typeof ProfileIndexRoute
   '/posts/$postId/edit': typeof PostsPostIdEditRoute
   '/posts/$postId': typeof PostsPostIdIndexRoute
@@ -86,6 +94,7 @@ export interface FileRoutesById {
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
   '/posts/new': typeof PostsNewRoute
+  '/profile/$userId': typeof ProfileUserIdRoute
   '/profile/': typeof ProfileIndexRoute
   '/posts/$postId/edit': typeof PostsPostIdEditRoute
   '/posts/$postId/': typeof PostsPostIdIndexRoute
@@ -98,6 +107,7 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/signup'
     | '/posts/new'
+    | '/profile/$userId'
     | '/profile/'
     | '/posts/$postId/edit'
     | '/posts/$postId/'
@@ -108,6 +118,7 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/signup'
     | '/posts/new'
+    | '/profile/$userId'
     | '/profile'
     | '/posts/$postId/edit'
     | '/posts/$postId'
@@ -118,6 +129,7 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/signup'
     | '/posts/new'
+    | '/profile/$userId'
     | '/profile/'
     | '/posts/$postId/edit'
     | '/posts/$postId/'
@@ -129,6 +141,7 @@ export interface RootRouteChildren {
   AuthLoginRoute: typeof AuthLoginRoute
   AuthSignupRoute: typeof AuthSignupRoute
   PostsNewRoute: typeof PostsNewRoute
+  ProfileUserIdRoute: typeof ProfileUserIdRoute
   ProfileIndexRoute: typeof ProfileIndexRoute
   PostsPostIdEditRoute: typeof PostsPostIdEditRoute
   PostsPostIdIndexRoute: typeof PostsPostIdIndexRoute
@@ -148,6 +161,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile/'
       preLoaderRoute: typeof ProfileIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile/$userId': {
+      id: '/profile/$userId'
+      path: '/profile/$userId'
+      fullPath: '/profile/$userId'
+      preLoaderRoute: typeof ProfileUserIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/posts/new': {
@@ -201,6 +221,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthLoginRoute: AuthLoginRoute,
   AuthSignupRoute: AuthSignupRoute,
   PostsNewRoute: PostsNewRoute,
+  ProfileUserIdRoute: ProfileUserIdRoute,
   ProfileIndexRoute: ProfileIndexRoute,
   PostsPostIdEditRoute: PostsPostIdEditRoute,
   PostsPostIdIndexRoute: PostsPostIdIndexRoute,
