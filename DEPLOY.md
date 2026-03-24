@@ -1,64 +1,37 @@
-# 배포 가이드
+# 배포 체크리스트
 
-## 1. Vercel 환경변수 설정
-
-Vercel 대시보드 → Project → Settings → Environment Variables 에서 아래 값 추가:
-
-| 변수명 | 값 | 환경 |
-|--------|-----|------|
-| `VITE_SUPABASE_URL` | `https://zdgabsetpomlkztnwcwc.supabase.co` | Production, Preview, Development |
-| `VITE_SUPABASE_ANON_KEY` | Supabase 대시보드 → Settings → API → anon key | Production, Preview, Development |
-
----
-
-## 2. Supabase Edge Function 배포
+## Supabase 마이그레이션 적용
 
 ```bash
-# Supabase CLI 설치 (최초 1회)
-npm install -g supabase
-
-# 로그인
-supabase login
-
-# Edge Function 배포
-supabase functions deploy ai-assist --project-ref zdgabsetpomlkztnwcwc
-
-# API Key Secret 등록
-supabase secrets set MINIMAX_API_KEY=발급받은키 --project-ref zdgabsetpomlkztnwcwc
+supabase db push
 ```
 
----
+또는 Supabase 대시보드 → SQL Editor에서 아래 파일을 순서대로 실행:
 
-## 3. Vercel 배포
+1. `supabase/migrations/20260324000001_add_rls_policies.sql`
+2. `supabase/migrations/20260324000002_add_thumbnail_path.sql`
+3. `supabase/migrations/20260324000003_add_ai_rate_limits.sql`
 
-### 방법 A — GitHub 연동 (권장)
-1. [vercel.com](https://vercel.com) 로그인
-2. **Add New Project** → GitHub 레포 선택 (`CRUD-WEB`)
-3. Framework Preset: **Vite**
-4. 환경변수 입력 후 **Deploy**
+## Edge Function 환경변수
 
-### 방법 B — CLI
-```bash
-npm install -g vercel
-vercel --prod
-```
+Supabase 대시보드 → Edge Functions → `ai-assist` → Secrets에 아래 항목 설정:
 
----
+| 변수명 | 설명 | 필수 |
+|--------|------|------|
+| `MINIMAX_API_KEY` | MiniMax API 키 | ✅ |
+| `ALLOWED_ORIGIN` | 허용할 프론트엔드 도메인 (예: `https://example.com`) | ✅ |
+| `SUPABASE_URL` | Supabase 프로젝트 URL (자동 주입) | ✅ |
+| `SUPABASE_ANON_KEY` | anon 키 (자동 주입) | ✅ |
+| `SUPABASE_SERVICE_ROLE_KEY` | service_role 키 — rate limit DB 접근에 사용 | ✅ |
 
-## 4. 배포 후 확인 체크리스트
+> `SUPABASE_SERVICE_ROLE_KEY`가 없으면 AI rate limit이 **fail-closed** 동작하여
+> 모든 AI 요청이 차단됩니다. 반드시 설정하세요.
 
-- [ ] 메인 페이지 (`/`) 정상 로딩
-- [ ] 로그인 페이지 (`/auth/login`) 접근
-- [ ] Google OAuth 로그인 작동
-- [ ] 이메일 회원가입 → 인증 메일 수신
-- [ ] 로그인 후 글쓰기 (`/posts/new`) 접근
-- [ ] 게시글 등록 / 수정 / 삭제
-- [ ] AI 교정 버튼 동작
-- [ ] AI 글쓰기 버튼 동작
-- [ ] 새로고침 시 라우트 유지 (SPA rewrites 확인)
-- [ ] Supabase CORS 허용 목록에 Vercel 도메인 추가
+## Supabase Storage 버킷 확인
 
-### Supabase CORS 설정
-Supabase 대시보드 → Authentication → URL Configuration:
-- **Site URL**: `https://your-app.vercel.app`
-- **Redirect URLs**: `https://your-app.vercel.app/auth/callback`
+아래 두 버킷이 존재하는지 확인 (없으면 대시보드에서 생성):
+
+- `post-images` — 게시글 썸네일 (Public)
+- `avatars` — 프로필 아바타 (Public)
+
+버킷 공개 설정: Storage → 버킷 선택 → Make public
