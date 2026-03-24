@@ -13,6 +13,9 @@ styled-system/       # Panda CSS codegen 결과물
 # MCP (contains personal access tokens)
 .mcp.json
 
+# Claude Code local settings (per-developer, not shared)
+.claude/settings.local.json
+
 # Editor
 .vscode/
 .idea/
