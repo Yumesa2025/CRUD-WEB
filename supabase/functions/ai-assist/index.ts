@@ -31,6 +31,9 @@ async function checkRateLimit(userId: string): Promise<boolean> {
   return data === true;
 }
 
+// 클라이언트 측 동일 상수: src/services/ai.service.ts
+// AI_TEXT_MAX_LENGTH, AI_PROMPT_MAX_LENGTH, AI_BOARD_STYLE_MAX_LENGTH
+// 값 변경 시 두 파일을 함께 수정해야 합니다.
 const MAX_TEXT_LENGTH = 2000;
 const MAX_PROMPT_LENGTH = 500;
 const MAX_BOARD_STYLE_LENGTH = 50;

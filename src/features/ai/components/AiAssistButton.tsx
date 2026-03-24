@@ -1,9 +1,11 @@
 import { Fragment, useState } from 'react';
 import { Sparkles, Loader2, X, PenLine, Wand2, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useSetAtom } from 'jotai';
 import { css } from 'styled-system/css';
 import { useAiAssist, AiAssistAbortError } from '@/hooks/useAiAssist';
 import { AI_PROMPT_MAX_LENGTH, AI_TEXT_MAX_LENGTH, AI_BOARD_STYLE_MAX_LENGTH, BOARD_STYLES } from '@/services/ai.service';
+import { addToastAtom } from '@/stores/uiStore';
 import { wordDiff } from '@/utils/diff';
 
 interface AiAssistButtonProps {
@@ -13,6 +15,7 @@ interface AiAssistButtonProps {
 
 export function AiAssistButton({ getText, onApply }: AiAssistButtonProps) {
   const { trigger } = useAiAssist();
+  const addToast = useSetAtom(addToastAtom);
 
   // 게시판 성격
   const [selectedStyle, setSelectedStyle] = useState<string>(BOARD_STYLES[0]);
@@ -34,11 +37,11 @@ export function AiAssistButton({ getText, onApply }: AiAssistButtonProps) {
   const handleImprove = async () => {
     const current = getText();
     if (!current.trim()) {
-      alert('본문을 먼저 입력해주세요.');
+      addToast({ variant: 'error', title: '본문을 먼저 입력해주세요.' });
       return;
     }
     if (current.length > AI_TEXT_MAX_LENGTH) {
-      alert(`본문은 ${AI_TEXT_MAX_LENGTH}자 이하여야 합니다.`);
+      addToast({ variant: 'error', title: `본문은 ${AI_TEXT_MAX_LENGTH}자 이하여야 합니다.` });
       return;
     }
     setImproveResult(null);
