@@ -9,18 +9,18 @@ export function useAiAssist() {
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const mutation = useMutation({
-    mutationFn: ({ text, mode }: { text: string; mode: AiMode }) =>
-      aiAssist(text, mode),
+    mutationFn: ({ text, mode, boardStyle }: { text: string; mode: AiMode; boardStyle?: string }) =>
+      aiAssist(text, mode, boardStyle),
     onError: (error: Error) => {
       addToast({ variant: 'error', title: 'AI 오류', description: error.message });
     },
   });
 
-  const trigger = (text: string, mode: AiMode): Promise<string> => {
+  const trigger = (text: string, mode: AiMode, boardStyle?: string): Promise<string> => {
     return new Promise((resolve, reject) => {
       if (debounceTimer.current) clearTimeout(debounceTimer.current);
       debounceTimer.current = setTimeout(() => {
-        mutation.mutateAsync({ text, mode }).then(resolve).catch(reject);
+        mutation.mutateAsync({ text, mode, boardStyle }).then(resolve).catch(reject);
       }, 300);
     });
   };

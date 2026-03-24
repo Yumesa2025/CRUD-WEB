@@ -2,7 +2,25 @@ import { supabase } from '@/lib/supabase';
 
 export type AiMode = 'improve' | 'summarize' | 'write';
 
-export async function aiAssist(text: string, mode: AiMode): Promise<string> {
+export const BOARD_STYLES = ['일상', '정보공유', '질문', '후기', '감성글'] as const;
+export type BoardStyle = typeof BOARD_STYLES[number] | string;
+
+const ALLOWED_MODES: AiMode[] = ['improve', 'summarize', 'write'];
+export const AI_TEXT_MAX_LENGTH = 2000;
+export const AI_PROMPT_MAX_LENGTH = 500;
+export const AI_BOARD_STYLE_MAX_LENGTH = 50;
+
+export async function aiAssist(text: string, mode: AiMode, boardStyle: string = '일반'): Promise<string> {
+  if (!ALLOWED_MODES.includes(mode)) {
+    throw new Error('유효하지 않은 모드입니다.');
+  }
+
+  const maxLength = mode === 'write' ? AI_PROMPT_MAX_LENGTH : AI_TEXT_MAX_LENGTH;
+  if (!text.trim()) throw new Error('텍스트를 입력해주세요.');
+  if (text.length > maxLength) {
+    throw new Error(`입력이 너무 깁니다. 최대 ${maxLength}자까지 가능합니다.`);
+  }
+
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) throw new Error('로그인이 필요합니다');
 
@@ -14,7 +32,7 @@ export async function aiAssist(text: string, mode: AiMode): Promise<string> {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${session.access_token}`,
       },
-      body: JSON.stringify({ text, mode }),
+      body: JSON.stringify({ text, mode, boardStyle }),
     }
   );
 

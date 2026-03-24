@@ -146,6 +146,7 @@ export function PostList({ posts }: PostListProps) {
                   overflow: 'hidden',
                   display: '-webkit-box',
                   WebkitLineClamp: '3',
+                  // @ts-expect-error — WebkitBoxOrient는 Panda CSS 타입에 없지만 동작함
                   WebkitBoxOrient: 'vertical',
                 })}>
                   {post.content}
