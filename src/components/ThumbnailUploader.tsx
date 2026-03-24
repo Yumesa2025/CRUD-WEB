@@ -1,10 +1,10 @@
 import { useRef, useState } from 'react';
 import { ImagePlus, X } from 'lucide-react';
+import { useSetAtom } from 'jotai';
 import { css } from 'styled-system/css';
 import { uploadPostImage, type UploadResult } from '@/services/posts.service';
-
-const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+import { addToastAtom } from '@/stores/uiStore';
+import { validateImageFile, IMAGE_ACCEPT_ATTR, MAX_IMAGE_SIZE } from '@/utils/fileValidation';
 
 interface ThumbnailUploaderProps {
   value: string | null;
@@ -12,18 +12,15 @@ interface ThumbnailUploaderProps {
 }
 
 export function ThumbnailUploader({ value, onChange }: ThumbnailUploaderProps) {
+  const addToast = useSetAtom(addToastAtom);
   const inputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
 
   const handleFile = async (file: File) => {
-    const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
-    if (!ALLOWED_EXTENSIONS.includes(ext)) {
-      alert(`지원하지 않는 파일 형식입니다. (${ALLOWED_EXTENSIONS.join(', ')} 만 허용)`);
-      return;
-    }
-    if (file.size > MAX_FILE_SIZE) {
-      alert('파일 크기는 5MB 이하여야 합니다.');
+    const error = validateImageFile(file);
+    if (error) {
+      addToast({ variant: 'error', title: error });
       return;
     }
 
@@ -113,7 +110,7 @@ export function ThumbnailUploader({ value, onChange }: ThumbnailUploaderProps) {
               <p className={css({ fontSize: 'sm', color: 'gray.500' })}>
                 클릭하거나 이미지를 드래그하세요
               </p>
-              <p className={css({ fontSize: 'xs', color: 'gray.400' })}>JPG, PNG, WEBP, GIF (최대 5MB)</p>
+              <p className={css({ fontSize: 'xs', color: 'gray.400' })}>JPG, PNG, WEBP, GIF (최대 {MAX_IMAGE_SIZE / 1024 / 1024}MB)</p>
             </>
           )}
         </div>
@@ -122,7 +119,7 @@ export function ThumbnailUploader({ value, onChange }: ThumbnailUploaderProps) {
       <input
         ref={inputRef}
         type="file"
-        accept=".jpg,.jpeg,.png,.webp,.gif"
+        accept={IMAGE_ACCEPT_ATTR}
         onChange={handleChange}
         className={css({ display: 'none' })}
       />

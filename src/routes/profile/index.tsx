@@ -11,6 +11,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useProfile, useMyPosts, useUpdateProfile, useUploadAvatar } from '@/hooks/useProfile';
 import { PostList } from '@/features/board/components/PostList';
 import { addToastAtom } from '@/stores/uiStore';
+import { validateImageFile, IMAGE_ACCEPT_ATTR } from '@/utils/fileValidation';
 
 export const Route = createFileRoute('/profile/')({
   component: ProfilePage,
@@ -23,9 +24,6 @@ const profileSchema = z.object({
     .max(20, '닉네임은 20자 이하여야 합니다'),
 });
 type ProfileFormValues = z.infer<typeof profileSchema>;
-
-const AVATAR_ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
-const AVATAR_MAX_SIZE = 5 * 1024 * 1024; // 5MB
 
 function ProfileContent() {
   const { user } = useAuth();
@@ -63,14 +61,9 @@ function ProfileContent() {
     const file = e.target.files?.[0];
     if (!file || !user) return;
 
-    const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
-    if (!AVATAR_ALLOWED_EXTENSIONS.includes(ext)) {
-      addToast({ variant: 'error', title: `지원하지 않는 파일 형식입니다. (${AVATAR_ALLOWED_EXTENSIONS.join(', ')} 만 허용)` });
-      e.target.value = '';
-      return;
-    }
-    if (file.size > AVATAR_MAX_SIZE) {
-      addToast({ variant: 'error', title: '파일 크기는 5MB 이하여야 합니다.' });
+    const fileError = validateImageFile(file);
+    if (fileError) {
+      addToast({ variant: 'error', title: fileError });
       e.target.value = '';
       return;
     }
@@ -210,7 +203,7 @@ function ProfileContent() {
             <input
               ref={fileInputRef}
               type="file"
-              accept=".jpg,.jpeg,.png,.webp,.gif"
+              accept={IMAGE_ACCEPT_ATTR}
               className={css({ display: 'none' })}
               onChange={(e) => void handleFileChange(e)}
             />
