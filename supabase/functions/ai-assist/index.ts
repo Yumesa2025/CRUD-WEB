@@ -211,6 +211,7 @@ Deno.serve(async (req) => {
   }
 
   const mmData = await mmRes.json();
+  console.log('Minimax response:', JSON.stringify(mmData));
   const result: string = mmData?.choices?.[0]?.message?.content ?? '';
 
   return new Response(JSON.stringify({ result }), {
