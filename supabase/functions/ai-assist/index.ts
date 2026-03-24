@@ -3,24 +3,32 @@ import { createClient } from 'jsr:@supabase/supabase-js@2';
 
 const MINIMAX_API_URL = 'https://api.minimax.io/v1/text/chatcompletion_v2';
 
+const allowedOrigin = Deno.env.get('ALLOWED_ORIGIN');
+if (!allowedOrigin) {
+  console.error('ALLOWED_ORIGIN 환경변수가 설정되지 않았습니다. 배포 설정을 확인하세요.');
+}
+
 const corsHeaders = {
-  'Access-Control-Allow-Origin': Deno.env.get('ALLOWED_ORIGIN') ?? '*',
+  'Access-Control-Allow-Origin': allowedOrigin ?? '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
-// In-memory rate limit (Edge Function 재시작 시 초기화됨. 프로덕션에서는 DB 기반 권장)
-const rateLimitStore = new Map<string, number[]>();
+// service_role 클라이언트 — RLS 우회하여 rate limit 테이블에 쓰기
+const adminSupabase = createClient(
+  Deno.env.get('SUPABASE_URL')!,
+  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+);
 
-function checkRateLimit(userId: string): boolean {
-  const now = Date.now();
-  const windowMs = 60 * 1000;
-  const limit = 10;
-  const timestamps = (rateLimitStore.get(userId) ?? []).filter((t) => now - t < windowMs);
-  if (timestamps.length >= limit) return false;
-  timestamps.push(now);
-  rateLimitStore.set(userId, timestamps);
-  return true;
+// DB 기반 rate limit (cold start / scale-out 에 강건)
+// check_ai_rate_limit 함수: 원자적 upsert 후 허용 여부 반환
+async function checkRateLimit(userId: string): Promise<boolean> {
+  const { data, error } = await adminSupabase.rpc('check_ai_rate_limit', { p_user_id: userId });
+  if (error) {
+    console.error('rate limit check error:', error);
+    return false; // DB 오류 시 차단 (fail-closed) — 비용 보호 우선
+  }
+  return data === true;
 }
 
 const MAX_TEXT_LENGTH = 2000;
@@ -128,7 +136,7 @@ Deno.serve(async (req) => {
     });
   }
 
-  if (!checkRateLimit(user.id)) {
+  if (!(await checkRateLimit(user.id))) {
     return new Response(JSON.stringify({ error: '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.' }), {
       status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
