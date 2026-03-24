@@ -9,7 +9,7 @@ import { css } from 'styled-system/css';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile, useMyPosts, useUpdateProfile, useUploadAvatar } from '@/hooks/useProfile';
-import { PostList } from '@/features/board/components/PostList';
+import { MyPostList } from '@/features/board/components/MyPostList';
 import { addToastAtom } from '@/stores/uiStore';
 import { validateImageFile, IMAGE_ACCEPT_ATTR } from '@/utils/fileValidation';
 
@@ -320,7 +320,7 @@ function ProfileContent() {
             로딩 중...
           </div>
         ) : (
-          <PostList posts={myPosts ?? []} />
+          <MyPostList posts={myPosts ?? []} />
         )}
       </div>
     </div>

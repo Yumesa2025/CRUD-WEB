@@ -1,4 +1,4 @@
-import { Link } from '@tanstack/react-router';
+import { Link, useNavigate } from '@tanstack/react-router';
 import { motion } from 'framer-motion';
 import { ArrowUpRight } from 'lucide-react';
 import { css } from 'styled-system/css';
@@ -25,31 +25,7 @@ const ACCENT_COLORS = [
 ];
 
 function getAccentColor(id: string) {
-  const index = id.charCodeAt(0) % ACCENT_COLORS.length;
-  return ACCENT_COLORS[index];
-}
-
-function AvatarInitial({ username }: { username: string }) {
-  const initial = username.charAt(0).toUpperCase();
-  return (
-    <div
-      className={css({
-        w: '7',
-        h: '7',
-        borderRadius: 'full',
-        bg: 'brand.100',
-        color: 'brand.700',
-        fontSize: 'xs',
-        fontWeight: 'bold',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        flexShrink: '0',
-      })}
-    >
-      {initial}
-    </div>
-  );
+  return ACCENT_COLORS[id.charCodeAt(0) % ACCENT_COLORS.length];
 }
 
 interface PostListProps {
@@ -57,6 +33,8 @@ interface PostListProps {
 }
 
 export function PostList({ posts }: PostListProps) {
+  const navigate = useNavigate();
+
   if (!posts.length) {
     return (
       <div className={css({ py: '20', textAlign: 'center', color: 'gray.400', fontSize: 'sm' })}>
@@ -82,26 +60,25 @@ export function PostList({ posts }: PostListProps) {
 
         return (
           <motion.div key={post.id} variants={itemVariants}>
-            <Link
-              to="/posts/$postId"
-              params={{ postId: post.id }}
+            <div
               className={css({
-                display: 'flex',
-                flexDirection: 'column',
                 borderRadius: 'xl',
                 border: '1px solid',
                 borderColor: 'gray.200',
                 bg: 'white',
-                textDecoration: 'none',
                 overflow: 'hidden',
                 transition: 'all 0.2s',
+                display: 'flex',
+                flexDirection: 'column',
                 h: 'full',
+                cursor: 'pointer',
                 _hover: {
                   boxShadow: '0 8px 24px rgba(0,0,0,0.1)',
                   borderColor: 'gray.300',
                   transform: 'translateY(-2px)',
                 },
               })}
+              onClick={() => void navigate({ to: '/posts/$postId', params: { postId: post.id } })}
             >
               {/* 썸네일 또는 컬러 액센트 바 */}
               {post.thumbnail_url ? (
@@ -111,10 +88,7 @@ export function PostList({ posts }: PostListProps) {
                   className={css({ w: 'full', h: '160px', objectFit: 'cover', display: 'block', flexShrink: '0' })}
                 />
               ) : (
-                <div
-                  style={{ background: accent }}
-                  className={css({ h: '4px', w: 'full', flexShrink: '0' })}
-                />
+                <div style={{ background: accent }} className={css({ h: '4px', w: 'full', flexShrink: '0' })} />
               )}
 
               {/* 본문 영역 */}
@@ -130,10 +104,7 @@ export function PostList({ posts }: PostListProps) {
                   })}>
                     {post.title}
                   </h2>
-                  <ArrowUpRight
-                    size={16}
-                    className={css({ color: 'gray.300', flexShrink: '0', mt: '0.5' })}
-                  />
+                  <ArrowUpRight size={16} className={css({ color: 'gray.300', flexShrink: '0', mt: '0.5' })} />
                 </div>
 
                 {/* 내용 미리보기 */}
@@ -161,18 +132,45 @@ export function PostList({ posts }: PostListProps) {
                   borderTop: '1px solid',
                   borderColor: 'gray.100',
                 })}>
-                  <div className={css({ display: 'flex', alignItems: 'center', gap: '2' })}>
-                    <AvatarInitial username={username} />
+                  <Link
+                    to="/profile/$userId"
+                    params={{ userId: post.user_id }}
+                    onClick={(e) => e.stopPropagation()}
+                    className={css({
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '2',
+                      textDecoration: 'none',
+                      _hover: { opacity: '0.75' },
+                    })}
+                  >
+                    <div
+                      className={css({
+                        w: '7',
+                        h: '7',
+                        borderRadius: 'full',
+                        bg: 'brand.100',
+                        color: 'brand.700',
+                        fontSize: 'xs',
+                        fontWeight: 'bold',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: '0',
+                      })}
+                    >
+                      {username.charAt(0).toUpperCase()}
+                    </div>
                     <span className={css({ fontSize: 'xs', color: 'gray.600', fontWeight: 'medium' })}>
                       {username}
                     </span>
-                  </div>
+                  </Link>
                   <span className={css({ fontSize: 'xs', color: 'gray.400' })}>
                     {formatDate(post.created_at)}
                   </span>
                 </div>
               </div>
-            </Link>
+            </div>
           </motion.div>
         );
       })}

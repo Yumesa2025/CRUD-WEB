@@ -1,8 +1,62 @@
 import { Link, useNavigate } from '@tanstack/react-router';
-import { LogIn, LogOut, PenLine, UserCircle } from 'lucide-react';
+import { LogIn, LogOut, PenLine } from 'lucide-react';
 import { css } from 'styled-system/css';
 import { useAuth } from '@/hooks/useAuth';
+import { useProfile } from '@/hooks/useProfile';
 import { SearchBar } from '@/components/SearchBar';
+
+function UserAvatar({ userId }: { userId: string }) {
+  const { data: profile } = useProfile(userId);
+  const initials = (profile?.username ?? '?').charAt(0).toUpperCase();
+
+  return (
+    <Link
+      to="/profile"
+      className={css({
+        display: 'flex',
+        alignItems: 'center',
+        gap: '2',
+        px: '3',
+        py: '1.5',
+        border: '1px solid token(colors.brand.100)',
+        borderRadius: 'full',
+        textDecoration: 'none',
+        color: 'brand.700',
+        fontSize: 'sm',
+        fontWeight: 'medium',
+        _hover: { bg: 'brand.50' },
+        transition: 'all 0.15s',
+      })}
+    >
+      {profile?.avatar_url ? (
+        <img
+          src={profile.avatar_url}
+          alt={profile.username}
+          className={css({ w: '6', h: '6', borderRadius: 'full', objectFit: 'cover', flexShrink: '0' })}
+        />
+      ) : (
+        <div
+          className={css({
+            w: '6',
+            h: '6',
+            borderRadius: 'full',
+            bg: 'brand.200',
+            color: 'brand.700',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 'xs',
+            fontWeight: 'bold',
+            flexShrink: '0',
+          })}
+        >
+          {initials}
+        </div>
+      )}
+      <span>{profile?.username ?? '프로필'}</span>
+    </Link>
+  );
+}
 
 export function Header() {
   const { user, signOut } = useAuth();
@@ -72,26 +126,9 @@ export function Header() {
                 <PenLine size={15} />
                 글쓰기
               </Link>
-              <Link
-                to="/profile"
-                className={css({
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '1',
-                  px: '4',
-                  py: '2',
-                  border: '1px solid token(colors.brand.100)',
-                  color: 'brand.600',
-                  borderRadius: 'md',
-                  textDecoration: 'none',
-                  fontSize: 'sm',
-                  fontWeight: 'medium',
-                  _hover: { bg: 'brand.50' },
-                })}
-              >
-                <UserCircle size={15} />
-                프로필
-              </Link>
+
+              <UserAvatar userId={user.id} />
+
               <button
                 onClick={handleSignOut}
                 className={css({

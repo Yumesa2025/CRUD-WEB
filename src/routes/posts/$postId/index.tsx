@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { motion } from 'framer-motion';
 import { Pencil, Trash2 } from 'lucide-react';
 import { css } from 'styled-system/css';
@@ -114,8 +114,14 @@ function PostDetailPage() {
         )}
       </div>
 
-      <div className={css({ display: 'flex', gap: '2', fontSize: 'sm', color: 'gray.400', mb: '8' })}>
-        <span>{post.profiles?.username ?? '알 수 없음'}</span>
+      <div className={css({ display: 'flex', gap: '2', fontSize: 'sm', color: 'gray.400', mb: '8', alignItems: 'center' })}>
+        <Link
+          to="/profile/$userId"
+          params={{ userId: post.user_id }}
+          className={css({ color: 'gray.500', fontWeight: 'medium', textDecoration: 'none', _hover: { color: 'brand.500' } })}
+        >
+          {post.profiles?.username ?? '알 수 없음'}
+        </Link>
         <span>·</span>
         <span>{new Date(post.created_at).toLocaleDateString('ko-KR')}</span>
       </div>
