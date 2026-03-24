@@ -28,7 +28,10 @@
       "Bash(git merge:*)",
       "Bash(git stash:*)",
       "Bash(npx tsc:*)",
-      "Bash(npx vite:*)"
+      "Bash(npx vite:*)",
+      "Bash(npm.cmd run:*)",
+      "Bash(npm.cmd test:*)",
+      "Bash(\"C:/ToyProject/DEPLOY.md\":*)"
     ]
   },
   "enableAllProjectMcpServers": true,
