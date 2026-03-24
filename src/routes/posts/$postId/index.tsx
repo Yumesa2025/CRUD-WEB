@@ -21,7 +21,7 @@ function PostDetailPage() {
   const isOwner = !!user && !!post && user.id === post.user_id;
 
   const handleDelete = async () => {
-    await deletePost(postId);
+    await deletePost({ id: postId, thumbnail_path: post.thumbnail_path });
     void navigate({ to: '/' });
   };
 

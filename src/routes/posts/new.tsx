@@ -8,6 +8,7 @@ import { ThumbnailUploader } from '@/components/ThumbnailUploader';
 import { useCreatePost } from '@/hooks/usePosts';
 import { postFormSchema, type PostFormValues } from '@/types/post.schema';
 import { AiAssistButton } from '@/features/ai/components/AiAssistButton';
+import type { UploadResult } from '@/services/posts.service';
 
 export const Route = createFileRoute('/posts/new')({
   component: PostsNewPage,
@@ -24,7 +25,7 @@ function PostsNewPage() {
 function PostsNewForm() {
   const navigate = useNavigate();
   const { mutateAsync, isPending } = useCreatePost();
-  const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
+  const [thumbnail, setThumbnail] = useState<UploadResult | null>(null);
 
   const {
     register,
@@ -35,7 +36,11 @@ function PostsNewForm() {
   } = useForm<PostFormValues>({ resolver: zodResolver(postFormSchema) });
 
   const onSubmit = async (values: PostFormValues) => {
-    const post = await mutateAsync({ ...values, thumbnail_url: thumbnailUrl });
+    const post = await mutateAsync({
+      ...values,
+      thumbnail_url: thumbnail?.url ?? null,
+      thumbnail_path: thumbnail?.path ?? null,
+    });
     void navigate({ to: '/posts/$postId', params: { postId: post.id } });
   };
 
@@ -94,7 +99,7 @@ function PostsNewForm() {
           />
         </div>
 
-        <ThumbnailUploader value={thumbnailUrl} onChange={setThumbnailUrl} />
+        <ThumbnailUploader value={thumbnail?.url ?? null} onChange={setThumbnail} />
 
         <button
           type="submit"

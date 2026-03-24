@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { usePost, useUpdatePost } from '@/hooks/usePosts';
 import { postFormSchema, type PostFormValues } from '@/types/post.schema';
 import { AiAssistButton } from '@/features/ai/components/AiAssistButton';
+import type { UploadResult } from '@/services/posts.service';
 
 export const Route = createFileRoute('/posts/$postId/edit')({
   component: PostEditPage,
@@ -28,7 +29,7 @@ function PostEditForm() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { mutateAsync, isPending } = useUpdatePost();
-  const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
+  const [thumbnail, setThumbnail] = useState<UploadResult | null>(null);
 
   const {
     register,
@@ -42,7 +43,8 @@ function PostEditForm() {
   useEffect(() => {
     if (post) {
       reset({ title: post.title, content: post.content });
-      setThumbnailUrl(post.thumbnail_url ?? null);
+      // thumbnail_path가 없는 기존 글도 미리보기 표시 (path는 빈 문자열로 폴백)
+      setThumbnail(post.thumbnail_url ? { url: post.thumbnail_url, path: post.thumbnail_path ?? '' } : null);
     }
   }, [post, reset]);
 
@@ -53,7 +55,13 @@ function PostEditForm() {
   }, [post, user, navigate]);
 
   const onSubmit = async (values: PostFormValues) => {
-    await mutateAsync({ id: postId, ...values, thumbnail_url: thumbnailUrl });
+    await mutateAsync({
+      id: postId,
+      ...values,
+      thumbnail_url: thumbnail?.url ?? null,
+      thumbnail_path: thumbnail?.path ?? null,
+      old_thumbnail_path: post?.thumbnail_path ?? null,
+    });
     void navigate({ to: '/posts/$postId', params: { postId } });
   };
 
@@ -144,7 +152,7 @@ function PostEditForm() {
           />
         </div>
 
-        <ThumbnailUploader value={thumbnailUrl} onChange={setThumbnailUrl} />
+        <ThumbnailUploader value={thumbnail?.url ?? null} onChange={setThumbnail} />
 
         <button
           type="submit"

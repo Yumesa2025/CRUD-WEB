@@ -8,7 +8,7 @@ export interface PostsPage {
   nextPage: number | null;
 }
 
-const POST_SELECT = 'id, user_id, title, content, thumbnail_url, created_at, updated_at, profiles(username, avatar_url)';
+const POST_SELECT = 'id, user_id, title, content, thumbnail_url, thumbnail_path, created_at, updated_at, profiles(username, avatar_url)';
 
 export async function getPosts(): Promise<Post[]> {
   const { data, error } = await supabase
@@ -70,6 +70,7 @@ export async function createPost(
   title: string,
   content: string,
   thumbnail_url?: string | null,
+  thumbnail_path?: string | null,
 ): Promise<Post> {
   const {
     data: { user },
@@ -79,7 +80,13 @@ export async function createPost(
 
   const { data, error } = await supabase
     .from('posts')
-    .insert({ title, content, user_id: user.id, thumbnail_url: thumbnail_url ?? null })
+    .insert({
+      title,
+      content,
+      user_id: user.id,
+      thumbnail_url: thumbnail_url ?? null,
+      thumbnail_path: thumbnail_path ?? null,
+    })
     .select()
     .single();
 
@@ -92,35 +99,57 @@ export async function updatePost(
   title: string,
   content: string,
   thumbnail_url?: string | null,
+  thumbnail_path?: string | null,
+  old_thumbnail_path?: string | null,
 ): Promise<Post> {
   const { data, error } = await supabase
     .from('posts')
-    .update({ title, content, thumbnail_url: thumbnail_url ?? null })
+    .update({
+      title,
+      content,
+      thumbnail_url: thumbnail_url ?? null,
+      thumbnail_path: thumbnail_path ?? null,
+    })
     .eq('id', id)
     .select()
     .single();
 
   if (error) throw error;
+
+  // 썸네일이 교체되거나 제거된 경우 기존 파일 삭제
+  if (old_thumbnail_path && old_thumbnail_path !== thumbnail_path) {
+    await supabase.storage.from('post-images').remove([old_thumbnail_path]);
+  }
+
   return { ...data, profiles: null };
 }
 
-export async function deletePost(id: string): Promise<void> {
+export async function deletePost(id: string, thumbnail_path?: string | null): Promise<void> {
   const { error } = await supabase.from('posts').delete().eq('id', id);
   if (error) throw error;
+
+  if (thumbnail_path) {
+    await supabase.storage.from('post-images').remove([thumbnail_path]);
+  }
 }
 
-export async function uploadPostImage(file: File): Promise<string> {
+export interface UploadResult {
+  url: string;
+  path: string;
+}
+
+export async function uploadPostImage(file: File): Promise<UploadResult> {
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) throw new Error('로그인이 필요합니다');
 
-  const ext = file.name.split('.').pop();
+  const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
   const path = `${user.id}/${Date.now()}.${ext}`;
 
   const { error } = await supabase.storage.from('post-images').upload(path, file);
   if (error) throw error;
 
   const { data } = supabase.storage.from('post-images').getPublicUrl(path);
-  return data.publicUrl;
+  return { url: data.publicUrl, path };
 }

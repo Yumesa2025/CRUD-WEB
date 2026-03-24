@@ -56,8 +56,9 @@ export function useCreatePost() {
       title,
       content,
       thumbnail_url,
-    }: PostFormValues & { thumbnail_url?: string | null }) =>
-      createPost(title, content, thumbnail_url),
+      thumbnail_path,
+    }: PostFormValues & { thumbnail_url?: string | null; thumbnail_path?: string | null }) =>
+      createPost(title, content, thumbnail_url, thumbnail_path),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['posts'] });
     },
@@ -72,8 +73,14 @@ export function useUpdatePost() {
       title,
       content,
       thumbnail_url,
-    }: PostFormValues & { id: string; thumbnail_url?: string | null }) =>
-      updatePost(id, title, content, thumbnail_url),
+      thumbnail_path,
+      old_thumbnail_path,
+    }: PostFormValues & {
+      id: string;
+      thumbnail_url?: string | null;
+      thumbnail_path?: string | null;
+      old_thumbnail_path?: string | null;
+    }) => updatePost(id, title, content, thumbnail_url, thumbnail_path, old_thumbnail_path),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ['posts', id] });
       queryClient.invalidateQueries({ queryKey: ['posts'] });
@@ -84,7 +91,8 @@ export function useUpdatePost() {
 export function useDeletePost() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => deletePost(id),
+    mutationFn: ({ id, thumbnail_path }: { id: string; thumbnail_path?: string | null }) =>
+      deletePost(id, thumbnail_path),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['posts'] });
     },
