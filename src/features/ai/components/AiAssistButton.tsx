@@ -2,7 +2,7 @@ import { Fragment, useState } from 'react';
 import { Sparkles, Loader2, X, PenLine, Wand2, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { css } from 'styled-system/css';
-import { useAiAssist } from '@/hooks/useAiAssist';
+import { useAiAssist, AiAssistAbortError } from '@/hooks/useAiAssist';
 import { AI_PROMPT_MAX_LENGTH, AI_TEXT_MAX_LENGTH, AI_BOARD_STYLE_MAX_LENGTH, BOARD_STYLES } from '@/services/ai.service';
 import { wordDiff } from '@/utils/diff';
 
@@ -46,6 +46,8 @@ export function AiAssistButton({ getText, onApply }: AiAssistButtonProps) {
     try {
       const result = await trigger(current, 'improve', effectiveStyle);
       if (result) setImproveResult({ original: current, revised: result });
+    } catch (err) {
+      if (!(err instanceof AiAssistAbortError)) throw err;
     } finally {
       setImproving(false);
     }
@@ -61,6 +63,8 @@ export function AiAssistButton({ getText, onApply }: AiAssistButtonProps) {
         setWriteOpen(false);
         setWriteInput('');
       }
+    } catch (err) {
+      if (!(err instanceof AiAssistAbortError)) throw err;
     } finally {
       setWriting(false);
     }
