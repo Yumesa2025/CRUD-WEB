@@ -49,7 +49,7 @@ export async function uploadAvatar(userId: string, file: File): Promise<string> 
 export async function getMyPosts(userId: string): Promise<Post[]> {
   const { data, error } = await supabase
     .from('posts')
-    .select('*, profiles(username, avatar_url)')
+    .select('*, profiles!posts_user_id_profiles_fkey(username, avatar_url)')
     .eq('user_id', userId)
     .order('created_at', { ascending: false });
   if (error) throw error;

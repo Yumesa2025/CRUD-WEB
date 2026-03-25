@@ -10,7 +10,7 @@ export interface PostsPage {
 
 const BASE_POST_SELECT =
   'id, user_id, title, content, thumbnail_url, thumbnail_path, created_at, updated_at, ' +
-  'profiles(username, avatar_url)';
+  'profiles!posts_user_id_profiles_fkey(username, avatar_url)';
 
 const POST_SELECT_WITH_STATS =
   `${BASE_POST_SELECT}, ` +

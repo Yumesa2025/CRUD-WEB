@@ -12,7 +12,8 @@ export interface CommentRow {
 }
 
 const COMMENT_SELECT =
-  'id, post_id, user_id, parent_id, content, created_at, updated_at, profiles(username, avatar_url)';
+  'id, post_id, user_id, parent_id, content, created_at, updated_at, ' +
+  'profiles!comments_user_id_fkey(username, avatar_url)';
 
 export async function getComments(postId: string): Promise<CommentRow[]> {
   const { data, error } = await supabase
