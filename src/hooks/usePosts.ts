@@ -21,6 +21,7 @@ export function useInfinitePosts() {
     queryFn: ({ pageParam }) => getPostsPage(pageParam as number),
     initialPageParam: 0,
     getNextPageParam: (lastPage) => lastPage.nextPage,
+    staleTime: 0,
   });
 }
 
