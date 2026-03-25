@@ -2,7 +2,7 @@ import { supabase } from '@/lib/supabase';
 import type { Post } from '@/types/post.schema';
 
 const BOOKMARK_POST_SELECT =
-  'post_id, posts(id, user_id, title, content, thumbnail_url, thumbnail_path, created_at, updated_at, profiles(username, avatar_url))';
+  'post_id, posts(id, user_id, title, content, thumbnail_url, thumbnail_path, created_at, updated_at, profiles!posts_user_id_profiles_fkey(username, avatar_url))';
 
 export async function getBookmarkStatus(
   postId: string,
