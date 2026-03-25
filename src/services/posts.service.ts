@@ -8,9 +8,12 @@ export interface PostsPage {
   nextPage: number | null;
 }
 
-const POST_SELECT =
+const BASE_POST_SELECT =
   'id, user_id, title, content, thumbnail_url, thumbnail_path, created_at, updated_at, ' +
-  'profiles(username, avatar_url), ' +
+  'profiles(username, avatar_url)';
+
+const POST_SELECT_WITH_STATS =
+  `${BASE_POST_SELECT}, ` +
   'comment_count:comments!comments_post_id_fkey(count), ' +
   'like_count:likes!likes_post_id_fkey(count)';
 
@@ -25,11 +28,27 @@ function toPost(raw: any): Post {
   } as Post;
 }
 
+async function runPostQuery(
+  runQuery: (select: string) => Promise<{ data: any; error: any }>,
+) {
+  const withStats = await runQuery(POST_SELECT_WITH_STATS);
+  if (!withStats.error) return withStats;
+
+  console.warn(
+    'Post stats query failed, falling back to base post query:',
+    withStats.error,
+  );
+
+  return runQuery(BASE_POST_SELECT);
+}
+
 export async function getPosts(): Promise<Post[]> {
-  const { data, error } = await supabase
-    .from('posts')
-    .select(POST_SELECT)
-    .order('created_at', { ascending: false });
+  const { data, error } = await runPostQuery((select) =>
+    supabase
+      .from('posts')
+      .select(select)
+      .order('created_at', { ascending: false }),
+  );
 
   if (error) throw error;
   return (data ?? []).map(toPost);
@@ -39,11 +58,13 @@ export async function getPostsPage(page: number, limit = POSTS_PER_PAGE): Promis
   const from = page * limit;
   const to = from + limit - 1;
 
-  const { data, error } = await supabase
-    .from('posts')
-    .select(POST_SELECT)
-    .order('created_at', { ascending: false })
-    .range(from, to);
+  const { data, error } = await runPostQuery((select) =>
+    supabase
+      .from('posts')
+      .select(select)
+      .order('created_at', { ascending: false })
+      .range(from, to),
+  );
 
   if (error) throw error;
   const posts = (data ?? []).map(toPost);
@@ -58,12 +79,14 @@ export async function searchPosts(
   const from = page * limit;
   const to = from + limit - 1;
 
-  const { data, error } = await supabase
-    .from('posts')
-    .select(POST_SELECT)
-    .textSearch('fts', query, { type: 'websearch', config: 'simple' })
-    .order('created_at', { ascending: false })
-    .range(from, to);
+  const { data, error } = await runPostQuery((select) =>
+    supabase
+      .from('posts')
+      .select(select)
+      .textSearch('fts', query, { type: 'websearch', config: 'simple' })
+      .order('created_at', { ascending: false })
+      .range(from, to),
+  );
 
   if (error) throw error;
   const posts = (data ?? []).map(toPost);
@@ -71,11 +94,13 @@ export async function searchPosts(
 }
 
 export async function getPost(id: string): Promise<Post> {
-  const { data, error } = await supabase
-    .from('posts')
-    .select(POST_SELECT)
-    .eq('id', id)
-    .single();
+  const { data, error } = await runPostQuery((select) =>
+    supabase
+      .from('posts')
+      .select(select)
+      .eq('id', id)
+      .single(),
+  );
 
   if (error) throw error;
   return toPost(data);
