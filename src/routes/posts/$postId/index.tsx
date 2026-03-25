@@ -14,8 +14,8 @@ export const Route = createFileRoute('/posts/$postId/')({
 
 function PostDetailPage() {
   const { postId } = Route.useParams();
-  const { data: post, isLoading } = usePost(postId);
   const { user } = useAuth();
+  const { data: post, isLoading } = usePost(postId, user?.id ?? null);
   const navigate = useNavigate();
   const { mutateAsync: deletePost, isPending: isDeleting } = useDeletePost();
   const [showConfirm, setShowConfirm] = useState(false);

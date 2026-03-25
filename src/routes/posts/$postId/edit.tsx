@@ -25,8 +25,8 @@ function PostEditPage() {
 
 function PostEditForm() {
   const { postId } = Route.useParams();
-  const { data: post, isLoading } = usePost(postId);
   const { user } = useAuth();
+  const { data: post, isLoading } = usePost(postId, user?.id ?? null);
   const navigate = useNavigate();
   const { mutateAsync, isPending } = useUpdatePost();
   const [thumbnail, setThumbnail] = useState<UploadResult | null>(null);

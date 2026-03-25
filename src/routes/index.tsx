@@ -18,16 +18,17 @@ export const Route = createFileRoute('/')({
 function IndexPage() {
   const { user } = useAuth();
   const query = useAtomValue(searchQueryAtom);
+  const normalizedQuery = query.trim();
 
   const infiniteResult = useInfinitePosts(user?.id ?? null);
-  const searchResult = useSearchPosts(query);
+  const searchResult = useSearchPosts(normalizedQuery, user?.id ?? null);
 
-  const active = query ? searchResult : infiniteResult;
-  const posts = active.data?.pages.flatMap((p) => p.data) ?? [];
+  const active = normalizedQuery ? searchResult : infiniteResult;
+  const posts = active.data?.pages.flatMap((page) => page.data) ?? [];
   const totalCount = posts.length;
 
-  // Intersection Observer sentinel
   const sentinelRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     const el = sentinelRef.current;
     if (!el) return;
@@ -40,6 +41,7 @@ function IndexPage() {
       },
       { threshold: 0.1 },
     );
+
     observer.observe(el);
     return () => observer.disconnect();
   }, [active]);
@@ -49,15 +51,14 @@ function IndexPage() {
 
   return (
     <div>
-      {/* 헤더 */}
       <div className={css({ mb: '8' })}>
         <h1 className={css({ fontSize: '2xl', fontWeight: 'bold', color: 'gray.900', mb: '1' })}>
-          {query ? `"${query}" 검색 결과` : '게시글'}
+          {normalizedQuery ? `"${normalizedQuery}" 검색 결과` : '게시글'}
         </h1>
         <p className={css({ fontSize: 'sm', color: 'gray.400' })}>
           {isLoading
             ? '불러오는 중...'
-            : query
+            : normalizedQuery
               ? `${totalCount}개의 결과`
               : `${totalCount}개의 글`}
         </p>
@@ -68,7 +69,7 @@ function IndexPage() {
 
       {!isLoading && !isError && (
         <>
-          {posts.length === 0 && query ? (
+          {posts.length === 0 && normalizedQuery ? (
             <div className={css({ py: '20', textAlign: 'center', color: 'gray.400', fontSize: 'sm' })}>
               검색 결과가 없습니다.
             </div>
@@ -78,25 +79,25 @@ function IndexPage() {
         </>
       )}
 
-      {/* 추가 로딩 스피너 */}
       {active.isFetchingNextPage && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           className={css({ display: 'flex', justifyContent: 'center', py: '8' })}
         >
-          <Loader2 size={24} className={css({ color: 'brand.400', animation: 'spin 1s linear infinite' })} />
+          <Loader2
+            size={24}
+            className={css({ color: 'brand.400', animation: 'spin 1s linear infinite' })}
+          />
         </motion.div>
       )}
 
-      {/* 끝 메시지 */}
       {!active.hasNextPage && posts.length > 0 && !active.isFetchingNextPage && (
         <p className={css({ textAlign: 'center', fontSize: 'sm', color: 'gray.400', py: '8' })}>
-          모든 게시글을 읽었습니다.
+          모든 게시글을 확인했습니다.
         </p>
       )}
 
-      {/* Intersection Observer 센티넬 */}
       <div ref={sentinelRef} className={css({ h: '1px' })} />
 
       {user && (

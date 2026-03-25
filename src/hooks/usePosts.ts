@@ -11,13 +11,20 @@ import {
 } from '@/services/posts.service';
 import type { PostFormValues } from '@/types/post.schema';
 
-export function usePosts() {
-  return useQuery({ queryKey: ['posts'], queryFn: getPosts });
+function getAuthScope(userId?: string | null) {
+  return userId ?? 'anon';
+}
+
+export function usePosts(userId?: string | null) {
+  return useQuery({
+    queryKey: ['posts', 'list', getAuthScope(userId)],
+    queryFn: getPosts,
+  });
 }
 
 export function useInfinitePosts(userId?: string | null) {
   return useInfiniteQuery({
-    queryKey: ['posts', 'infinite', userId ?? null],
+    queryKey: ['posts', 'infinite', getAuthScope(userId)],
     queryFn: ({ pageParam }) => getPostsPage(pageParam as number),
     initialPageParam: 0,
     getNextPageParam: (lastPage) => lastPage.nextPage,
@@ -26,7 +33,7 @@ export function useInfinitePosts(userId?: string | null) {
   });
 }
 
-export function useSearchPosts(query: string) {
+export function useSearchPosts(query: string, userId?: string | null) {
   const [debouncedQuery, setDebouncedQuery] = useState(query);
 
   useEffect(() => {
@@ -35,19 +42,22 @@ export function useSearchPosts(query: string) {
   }, [query]);
 
   return useInfiniteQuery({
-    queryKey: ['posts', 'search', debouncedQuery],
+    queryKey: ['posts', 'search', getAuthScope(userId), debouncedQuery],
     queryFn: ({ pageParam }) => searchPosts(debouncedQuery, pageParam as number),
     initialPageParam: 0,
     getNextPageParam: (lastPage) => lastPage.nextPage,
-    enabled: !!debouncedQuery,
+    enabled: debouncedQuery.length > 0,
+    staleTime: 0,
+    placeholderData: (prev) => prev,
   });
 }
 
-export function usePost(id: string) {
+export function usePost(id: string, userId?: string | null) {
   return useQuery({
-    queryKey: ['posts', id],
+    queryKey: ['posts', 'detail', id, getAuthScope(userId)],
     queryFn: () => getPost(id),
     enabled: !!id,
+    staleTime: 0,
   });
 }
 
@@ -83,8 +93,7 @@ export function useUpdatePost() {
       thumbnail_path?: string | null;
       old_thumbnail_path?: string | null;
     }) => updatePost(id, title, content, thumbnail_url, thumbnail_path, old_thumbnail_path),
-    onSuccess: (_, { id }) => {
-      queryClient.invalidateQueries({ queryKey: ['posts', id] });
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['posts'] });
     },
   });
