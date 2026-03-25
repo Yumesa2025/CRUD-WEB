@@ -6,9 +6,17 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Provider as JotaiProvider } from 'jotai';
 
 import { queryClient } from '@/lib/queryClient';
+import { supabase } from '@/lib/supabase';
 
 // TanStack Router CLI가 vite dev/build 시 자동 생성
 import { routeTree } from './routeTree.gen';
+
+// 로그인/로그아웃 시 posts 캐시 초기화 (인증 상태 변경 시 최신 데이터 보장)
+supabase.auth.onAuthStateChange((event) => {
+  if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
+    void queryClient.invalidateQueries({ queryKey: ['posts'] });
+  }
+});
 
 import './styles/index.css';
 

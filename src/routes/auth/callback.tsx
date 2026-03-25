@@ -12,17 +12,25 @@ function AuthCallbackPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    let navigated = false;
+
+    const goHome = () => {
+      if (navigated) return;
+      navigated = true;
+      void navigate({ to: '/' });
+    };
+
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
       if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session) {
-        void navigate({ to: '/' });
+        goHome();
       }
     });
 
     // 이미 세션이 있는 경우 (URL hash 처리 후)
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) void navigate({ to: '/' });
+      if (session) goHome();
     });
 
     return () => subscription.unsubscribe();
