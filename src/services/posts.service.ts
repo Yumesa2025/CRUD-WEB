@@ -10,7 +10,9 @@ export interface PostsPage {
 
 const POST_SELECT =
   'id, user_id, title, content, thumbnail_url, thumbnail_path, created_at, updated_at, ' +
-  'profiles(username, avatar_url), comment_count:comments(count), like_count:likes(count)';
+  'profiles(username, avatar_url), ' +
+  'comment_count:comments!comments_post_id_fkey(count), ' +
+  'like_count:likes!likes_post_id_fkey(count)';
 
 // PostgREST는 count 집계를 [{ count: N }] 형태로 반환 → Post 타입으로 변환
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
