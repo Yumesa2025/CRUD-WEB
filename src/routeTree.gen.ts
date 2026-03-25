@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProfileIndexRouteImport } from './routes/profile/index'
+import { Route as BookmarksIndexRouteImport } from './routes/bookmarks/index'
 import { Route as ProfileUserIdRouteImport } from './routes/profile/$userId'
 import { Route as PostsNewRouteImport } from './routes/posts/new'
 import { Route as AuthSignupRouteImport } from './routes/auth/signup'
@@ -27,6 +28,11 @@ const IndexRoute = IndexRouteImport.update({
 const ProfileIndexRoute = ProfileIndexRouteImport.update({
   id: '/profile/',
   path: '/profile/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BookmarksIndexRoute = BookmarksIndexRouteImport.update({
+  id: '/bookmarks/',
+  path: '/bookmarks/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileUserIdRoute = ProfileUserIdRouteImport.update({
@@ -72,6 +78,7 @@ export interface FileRoutesByFullPath {
   '/auth/signup': typeof AuthSignupRoute
   '/posts/new': typeof PostsNewRoute
   '/profile/$userId': typeof ProfileUserIdRoute
+  '/bookmarks/': typeof BookmarksIndexRoute
   '/profile/': typeof ProfileIndexRoute
   '/posts/$postId/edit': typeof PostsPostIdEditRoute
   '/posts/$postId/': typeof PostsPostIdIndexRoute
@@ -83,6 +90,7 @@ export interface FileRoutesByTo {
   '/auth/signup': typeof AuthSignupRoute
   '/posts/new': typeof PostsNewRoute
   '/profile/$userId': typeof ProfileUserIdRoute
+  '/bookmarks': typeof BookmarksIndexRoute
   '/profile': typeof ProfileIndexRoute
   '/posts/$postId/edit': typeof PostsPostIdEditRoute
   '/posts/$postId': typeof PostsPostIdIndexRoute
@@ -95,6 +103,7 @@ export interface FileRoutesById {
   '/auth/signup': typeof AuthSignupRoute
   '/posts/new': typeof PostsNewRoute
   '/profile/$userId': typeof ProfileUserIdRoute
+  '/bookmarks/': typeof BookmarksIndexRoute
   '/profile/': typeof ProfileIndexRoute
   '/posts/$postId/edit': typeof PostsPostIdEditRoute
   '/posts/$postId/': typeof PostsPostIdIndexRoute
@@ -108,6 +117,7 @@ export interface FileRouteTypes {
     | '/auth/signup'
     | '/posts/new'
     | '/profile/$userId'
+    | '/bookmarks/'
     | '/profile/'
     | '/posts/$postId/edit'
     | '/posts/$postId/'
@@ -119,6 +129,7 @@ export interface FileRouteTypes {
     | '/auth/signup'
     | '/posts/new'
     | '/profile/$userId'
+    | '/bookmarks'
     | '/profile'
     | '/posts/$postId/edit'
     | '/posts/$postId'
@@ -130,6 +141,7 @@ export interface FileRouteTypes {
     | '/auth/signup'
     | '/posts/new'
     | '/profile/$userId'
+    | '/bookmarks/'
     | '/profile/'
     | '/posts/$postId/edit'
     | '/posts/$postId/'
@@ -142,6 +154,7 @@ export interface RootRouteChildren {
   AuthSignupRoute: typeof AuthSignupRoute
   PostsNewRoute: typeof PostsNewRoute
   ProfileUserIdRoute: typeof ProfileUserIdRoute
+  BookmarksIndexRoute: typeof BookmarksIndexRoute
   ProfileIndexRoute: typeof ProfileIndexRoute
   PostsPostIdEditRoute: typeof PostsPostIdEditRoute
   PostsPostIdIndexRoute: typeof PostsPostIdIndexRoute
@@ -161,6 +174,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile/'
       preLoaderRoute: typeof ProfileIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bookmarks/': {
+      id: '/bookmarks/'
+      path: '/bookmarks'
+      fullPath: '/bookmarks/'
+      preLoaderRoute: typeof BookmarksIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile/$userId': {
@@ -222,6 +242,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthSignupRoute: AuthSignupRoute,
   PostsNewRoute: PostsNewRoute,
   ProfileUserIdRoute: ProfileUserIdRoute,
+  BookmarksIndexRoute: BookmarksIndexRoute,
   ProfileIndexRoute: ProfileIndexRoute,
   PostsPostIdEditRoute: PostsPostIdEditRoute,
   PostsPostIdIndexRoute: PostsPostIdIndexRoute,

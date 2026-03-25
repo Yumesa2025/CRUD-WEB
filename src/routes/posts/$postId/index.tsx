@@ -5,6 +5,8 @@ import { Pencil, Trash2 } from 'lucide-react';
 import { css } from 'styled-system/css';
 import { useAuth } from '@/hooks/useAuth';
 import { useDeletePost, usePost } from '@/hooks/usePosts';
+import { LikeBookmarkBar } from '@/features/board/components/LikeBookmarkBar';
+import { CommentSection } from '@/features/board/components/CommentSection';
 
 export const Route = createFileRoute('/posts/$postId/')({
   component: PostDetailPage,
@@ -139,6 +141,10 @@ function PostDetailPage() {
       >
         {post.content}
       </div>
+
+      <LikeBookmarkBar postId={postId} />
+
+      <CommentSection postId={postId} />
 
       {showConfirm && (
         <div

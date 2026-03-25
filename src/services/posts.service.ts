@@ -8,7 +8,20 @@ export interface PostsPage {
   nextPage: number | null;
 }
 
-const POST_SELECT = 'id, user_id, title, content, thumbnail_url, thumbnail_path, created_at, updated_at, profiles(username, avatar_url)';
+const POST_SELECT =
+  'id, user_id, title, content, thumbnail_url, thumbnail_path, created_at, updated_at, ' +
+  'profiles(username, avatar_url), comment_count:comments(count), like_count:likes(count)';
+
+// PostgREST는 count 집계를 [{ count: N }] 형태로 반환 → Post 타입으로 변환
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function toPost(raw: any): Post {
+  const { comment_count, like_count, ...rest } = raw;
+  return {
+    ...rest,
+    comment_count: (comment_count as Array<{ count: number }>)?.[0]?.count ?? 0,
+    like_count: (like_count as Array<{ count: number }>)?.[0]?.count ?? 0,
+  } as Post;
+}
 
 export async function getPosts(): Promise<Post[]> {
   const { data, error } = await supabase
@@ -17,7 +30,7 @@ export async function getPosts(): Promise<Post[]> {
     .order('created_at', { ascending: false });
 
   if (error) throw error;
-  return (data ?? []) as Post[];
+  return (data ?? []).map(toPost);
 }
 
 export async function getPostsPage(page: number, limit = POSTS_PER_PAGE): Promise<PostsPage> {
@@ -31,7 +44,7 @@ export async function getPostsPage(page: number, limit = POSTS_PER_PAGE): Promis
     .range(from, to);
 
   if (error) throw error;
-  const posts = (data ?? []) as Post[];
+  const posts = (data ?? []).map(toPost);
   return { data: posts, nextPage: posts.length === limit ? page + 1 : null };
 }
 
@@ -51,7 +64,7 @@ export async function searchPosts(
     .range(from, to);
 
   if (error) throw error;
-  const posts = (data ?? []) as Post[];
+  const posts = (data ?? []).map(toPost);
   return { data: posts, nextPage: posts.length === limit ? page + 1 : null };
 }
 
@@ -63,7 +76,7 @@ export async function getPost(id: string): Promise<Post> {
     .single();
 
   if (error) throw error;
-  return data as Post;
+  return toPost(data);
 }
 
 export async function createPost(

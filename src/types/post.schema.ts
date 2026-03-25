@@ -23,4 +23,6 @@ export interface Post {
   created_at: string;
   updated_at: string;
   profiles: { username: string; avatar_url: string | null } | null;
+  comment_count?: number;
+  like_count?: number;
 }

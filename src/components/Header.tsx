@@ -1,5 +1,5 @@
 import { Link, useNavigate } from '@tanstack/react-router';
-import { LogIn, LogOut, PenLine } from 'lucide-react';
+import { Bookmark, LogIn, LogOut, PenLine } from 'lucide-react';
 import { css } from 'styled-system/css';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
@@ -125,6 +125,27 @@ export function Header() {
               >
                 <PenLine size={15} />
                 글쓰기
+              </Link>
+
+              <Link
+                to="/bookmarks"
+                className={css({
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '1',
+                  px: '3',
+                  py: '2',
+                  border: '1px solid token(colors.brand.100)',
+                  color: 'brand.600',
+                  borderRadius: 'md',
+                  textDecoration: 'none',
+                  fontSize: 'sm',
+                  fontWeight: 'medium',
+                  _hover: { bg: 'brand.50' },
+                })}
+              >
+                <Bookmark size={15} />
+                저장
               </Link>
 
               <UserAvatar userId={user.id} />

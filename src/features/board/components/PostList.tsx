@@ -1,6 +1,6 @@
 import { Link, useNavigate } from '@tanstack/react-router';
 import { motion } from 'framer-motion';
-import { ArrowUpRight } from 'lucide-react';
+import { ArrowUpRight, Heart, MessageSquare } from 'lucide-react';
 import { css } from 'styled-system/css';
 import type { Post } from '@/types/post.schema';
 import { formatDate } from '@/utils/format';
@@ -165,9 +165,23 @@ export function PostList({ posts }: PostListProps) {
                       {username}
                     </span>
                   </Link>
-                  <span className={css({ fontSize: 'xs', color: 'gray.400' })}>
-                    {formatDate(post.created_at)}
-                  </span>
+                  <div className={css({ display: 'flex', alignItems: 'center', gap: '3' })}>
+                    {(post.comment_count ?? 0) > 0 && (
+                      <span className={css({ display: 'flex', alignItems: 'center', gap: '0.5', fontSize: 'xs', color: 'gray.400' })}>
+                        <MessageSquare size={11} />
+                        {post.comment_count}
+                      </span>
+                    )}
+                    {(post.like_count ?? 0) > 0 && (
+                      <span className={css({ display: 'flex', alignItems: 'center', gap: '0.5', fontSize: 'xs', color: 'gray.400' })}>
+                        <Heart size={11} />
+                        {post.like_count}
+                      </span>
+                    )}
+                    <span className={css({ fontSize: 'xs', color: 'gray.400' })}>
+                      {formatDate(post.created_at)}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
