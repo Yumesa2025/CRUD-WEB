@@ -15,13 +15,14 @@ export function usePosts() {
   return useQuery({ queryKey: ['posts'], queryFn: getPosts });
 }
 
-export function useInfinitePosts() {
+export function useInfinitePosts(userId?: string | null) {
   return useInfiniteQuery({
-    queryKey: ['posts', 'infinite'],
+    queryKey: ['posts', 'infinite', userId ?? null],
     queryFn: ({ pageParam }) => getPostsPage(pageParam as number),
     initialPageParam: 0,
     getNextPageParam: (lastPage) => lastPage.nextPage,
     staleTime: 0,
+    placeholderData: (prev) => prev,
   });
 }
 

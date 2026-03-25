@@ -19,7 +19,7 @@ function IndexPage() {
   const { user } = useAuth();
   const query = useAtomValue(searchQueryAtom);
 
-  const infiniteResult = useInfinitePosts();
+  const infiniteResult = useInfinitePosts(user?.id ?? null);
   const searchResult = useSearchPosts(query);
 
   const active = query ? searchResult : infiniteResult;
