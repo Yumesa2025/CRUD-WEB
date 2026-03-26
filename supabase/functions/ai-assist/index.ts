@@ -139,7 +139,7 @@ Deno.serve(async (req) => {
       Authorization: `Bearer ${minimaxKey}`,
     },
     body: JSON.stringify({
-      model: 'MiniMax-M2.1',
+      model: 'MiniMax-Text-01',
       messages: [
         { role: 'system', content: buildSystemPrompt(validMode, boardStyle) },
         { role: 'user', content: buildUserMessage(validMode, inputInspection.normalized) },
