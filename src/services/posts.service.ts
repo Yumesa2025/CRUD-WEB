@@ -79,11 +79,12 @@ export async function searchPosts(
   const from = page * limit;
   const to = from + limit - 1;
 
+  const escaped = query.replace(/[%_,()]/g, (c) => `\\${c}`);
   const { data, error } = await runPostQuery((select) =>
     supabase
       .from('posts')
       .select(select)
-      .or(`title.ilike.%${query}%,content.ilike.%${query}%`)
+      .or(`title.ilike.%${escaped}%,content.ilike.%${escaped}%`)
       .order('created_at', { ascending: false })
       .range(from, to),
   );
