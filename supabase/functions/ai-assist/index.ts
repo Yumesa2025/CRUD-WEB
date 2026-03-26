@@ -14,7 +14,7 @@ import {
   sanitizeBoardStyle,
 } from './guard.ts';
 
-const MINIMAX_API_URL = 'https://api.minimax.io/v1/text/chatcompletion_v2';
+const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
 
 const allowedOrigin = Deno.env.get('ALLOWED_ORIGIN');
 if (!allowedOrigin) {
@@ -126,19 +126,19 @@ Deno.serve(async (req) => {
 
   const boardStyle = sanitizeBoardStyle(rawBoardStyle, MAX_BOARD_STYLE_LENGTH);
 
-  const minimaxKey = Deno.env.get('MINIMAX_API_KEY');
-  if (!minimaxKey) {
+  const openaiKey = Deno.env.get('OPENAI_API_KEY');
+  if (!openaiKey) {
     return jsonResponse(500, { error: '서버 설정 오류입니다.' });
   }
 
-  const mmRes = await fetch(MINIMAX_API_URL, {
+  const mmRes = await fetch(OPENAI_API_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${minimaxKey}`,
+      Authorization: `Bearer ${openaiKey}`,
     },
     body: JSON.stringify({
-      model: 'MiniMax-M2.1',
+      model: 'gpt-4o-mini',
       messages: [
         { role: 'system', content: buildSystemPrompt(validMode, boardStyle) },
         { role: 'user', content: buildUserMessage(validMode, inputInspection.normalized) },
@@ -148,7 +148,7 @@ Deno.serve(async (req) => {
 
   if (!mmRes.ok) {
     const errText = await mmRes.text();
-    console.error(`Minimax API error (${mmRes.status}):`, errText);
+    console.error(`OpenAI API error (${mmRes.status}):`, errText);
     return jsonResponse(502, {
       error: 'AI 요청에 실패했습니다. 잠시 후 다시 시도해주세요.',
     });
