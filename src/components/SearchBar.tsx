@@ -12,7 +12,6 @@ export function SearchBar() {
 
   const handleExpand = () => {
     setIsExpanded(true);
-    setTimeout(() => inputRef.current?.focus(), 100);
   };
 
   const handleClear = () => {
@@ -50,6 +49,7 @@ export function SearchBar() {
             <Search size={14} className={css({ color: 'gray.400', flexShrink: '0' })} />
             <input
               ref={inputRef}
+              autoFocus
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onBlur={handleBlur}
