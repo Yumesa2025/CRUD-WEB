@@ -4,7 +4,6 @@ import {
   ALLOWED_MODES,
   type AiMode,
   MAX_BOARD_STYLE_LENGTH,
-  MAX_PROMPT_LENGTH,
   MAX_TEXT_LENGTH,
 } from './shared.ts';
 import {
@@ -100,7 +99,7 @@ Deno.serve(async (req) => {
   }
 
   const validMode = mode as AiMode;
-  const maxLength = validMode === 'write' ? MAX_PROMPT_LENGTH : MAX_TEXT_LENGTH;
+  const maxLength = MAX_TEXT_LENGTH;
 
   if (!text.trim()) {
     return jsonResponse(400, { error: '텍스트를 입력해주세요.' });
@@ -172,14 +171,8 @@ Deno.serve(async (req) => {
       length: outputInspection.normalized.length,
     });
 
-    if (outputInspection.reason === 'model_rejected') {
-      return jsonResponse(400, {
-        error: 'AI 보조는 게시글 작성과 직접 관련된 요청만 처리할 수 있습니다.',
-      });
-    }
-
     return jsonResponse(502, {
-      error: '안전하지 않은 AI 응답이 감지되어 요청을 중단했습니다.',
+      error: 'AI 응답이 올바르지 않습니다. 다시 시도해주세요.',
     });
   }
 
