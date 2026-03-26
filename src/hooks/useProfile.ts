@@ -41,6 +41,8 @@ export function useUpdateProfile() {
     }) => updateProfile(userId, username, avatarUrl),
     onSuccess: (data) => {
       queryClient.setQueryData(profileKeys.profile(data.id), data);
+      void queryClient.invalidateQueries({ queryKey: ['posts'] });
+      void queryClient.invalidateQueries({ queryKey: ['comments'] });
     },
   });
 }
