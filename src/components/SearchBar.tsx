@@ -12,7 +12,7 @@ export function SearchBar() {
 
   const handleExpand = () => {
     setIsExpanded(true);
-    setTimeout(() => inputRef.current?.focus(), 50);
+    setTimeout(() => inputRef.current?.focus(), 100);
   };
 
   const handleClear = () => {
