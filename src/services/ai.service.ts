@@ -41,6 +41,11 @@ export async function aiAssist(text: string, mode: AiMode, boardStyle: string = 
     res = await callFn(refreshed.session.access_token);
   }
 
+  // 콜드 스타트로 502면 1회 재시도
+  if (res.status === 502) {
+    res = await callFn(session.access_token);
+  }
+
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
     const err = data as { error?: string; message?: string };
