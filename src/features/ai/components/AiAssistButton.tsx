@@ -1,10 +1,10 @@
 import { Fragment, useState } from 'react';
-import { Sparkles, Loader2, X, PenLine, Wand2, Check } from 'lucide-react';
+import { Sparkles, Loader2, X, Wand2, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSetAtom } from 'jotai';
 import { css } from 'styled-system/css';
 import { useAiAssist, AiAssistAbortError } from '@/hooks/useAiAssist';
-import { AI_PROMPT_MAX_LENGTH, AI_TEXT_MAX_LENGTH, AI_BOARD_STYLE_MAX_LENGTH, BOARD_STYLES } from '@/services/ai.service';
+import { AI_TEXT_MAX_LENGTH, AI_BOARD_STYLE_MAX_LENGTH, BOARD_STYLES } from '@/services/ai.service';
 import { addToastAtom } from '@/stores/uiStore';
 import { wordDiff } from '@/utils/diff';
 
@@ -27,12 +27,7 @@ export function AiAssistButton({ getText, onApply }: AiAssistButtonProps) {
   const [improving, setImproving] = useState(false);
   const [improveResult, setImproveResult] = useState<{ original: string; revised: string } | null>(null);
 
-  // 글쓰기
-  const [writeOpen, setWriteOpen] = useState(false);
-  const [writeInput, setWriteInput] = useState('');
-  const [writing, setWriting] = useState(false);
-
-  const isPending = improving || writing;
+  const isPending = improving;
 
   const handleImprove = async () => {
     const current = getText();
@@ -53,23 +48,6 @@ export function AiAssistButton({ getText, onApply }: AiAssistButtonProps) {
       if (!(err instanceof AiAssistAbortError)) throw err;
     } finally {
       setImproving(false);
-    }
-  };
-
-  const handleWrite = async () => {
-    if (!writeInput.trim()) return;
-    setWriting(true);
-    try {
-      const result = await trigger(writeInput, 'write', effectiveStyle);
-      if (result) {
-        onApply(result);
-        setWriteOpen(false);
-        setWriteInput('');
-      }
-    } catch (err) {
-      if (!(err instanceof AiAssistAbortError)) throw err;
-    } finally {
-      setWriting(false);
     }
   };
 
@@ -163,95 +141,7 @@ export function AiAssistButton({ getText, onApply }: AiAssistButtonProps) {
           AI 교정
         </button>
 
-        {/* AI 글쓰기 */}
-        <button
-          type="button"
-          disabled={isPending}
-          onClick={() => setWriteOpen((v) => !v)}
-          className={css({
-            display: 'inline-flex', alignItems: 'center', gap: '1.5',
-            px: '3', py: '1.5', fontSize: 'xs', fontWeight: 'medium',
-            borderRadius: 'md', border: '1px solid', cursor: 'pointer', transition: 'all 0.15s',
-            borderColor: writeOpen ? 'brand.500' : 'gray.300',
-            color: writeOpen ? 'brand.700' : 'gray.700',
-            bg: writeOpen ? 'brand.50' : 'white',
-            _hover: { bg: 'gray.50', borderColor: 'gray.400' },
-            _disabled: { opacity: '0.5', cursor: 'not-allowed' },
-          })}
-        >
-          <PenLine size={12} />
-          AI 글쓰기
-        </button>
       </div>
-
-      {/* AI 글쓰기 입력창 */}
-      <AnimatePresence>
-        {writeOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.2 }}
-            className={css({
-              mt: '3', p: '3',
-              bg: 'brand.50', border: '1px solid', borderColor: 'brand.200',
-              borderRadius: 'md',
-            })}
-          >
-            <p className={css({ fontSize: 'xs', fontWeight: 'semibold', color: 'brand.700', mb: '2' })}>
-              어떤 내용의 글을 작성할까요?
-            </p>
-            <textarea
-              value={writeInput}
-              onChange={(e) => setWriteInput(e.target.value.slice(0, AI_PROMPT_MAX_LENGTH))}
-              placeholder="예: 봄날 산책에 대한 감성적인 글, 오늘 있었던 재미있는 일..."
-              rows={3}
-              maxLength={AI_PROMPT_MAX_LENGTH}
-              className={css({
-                w: 'full', px: '3', py: '2',
-                border: '1px solid', borderColor: 'brand.300',
-                borderRadius: 'md', fontSize: 'sm', outline: 'none',
-                bg: 'white', resize: 'vertical',
-                _focus: { borderColor: 'brand.500', boxShadow: '0 0 0 3px token(colors.brand.100)' },
-              })}
-            />
-            <div className={css({ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: '2' })}>
-              <span className={css({ fontSize: 'xs', color: 'gray.400' })}>
-                {writeInput.length} / {AI_PROMPT_MAX_LENGTH}
-              </span>
-              <div className={css({ display: 'flex', gap: '2' })}>
-                <button
-                  type="button"
-                  onClick={() => { setWriteOpen(false); setWriteInput(''); }}
-                  className={css({
-                    px: '3', py: '1.5', fontSize: 'xs', borderRadius: 'md',
-                    border: '1px solid', borderColor: 'gray.300', bg: 'white',
-                    color: 'gray.600', cursor: 'pointer', _hover: { bg: 'gray.50' },
-                  })}
-                >
-                  취소
-                </button>
-                <button
-                  type="button"
-                  disabled={writing || !writeInput.trim()}
-                  onClick={() => void handleWrite()}
-                  className={css({
-                    display: 'inline-flex', alignItems: 'center', gap: '1.5',
-                    px: '3', py: '1.5', fontSize: 'xs', fontWeight: 'medium',
-                    borderRadius: 'md', border: 'none', cursor: 'pointer',
-                    bg: 'brand.500', color: 'white',
-                    _hover: { bg: 'brand.600' },
-                    _disabled: { bg: 'brand.300', cursor: 'not-allowed' },
-                  })}
-                >
-                  {writing && <Loader2 size={12} className={css({ animation: 'spin 1s linear infinite' })} />}
-                  {writing ? '작성 중...' : '글 작성'}
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* AI 교정 결과 박스 */}
       <AnimatePresence>
