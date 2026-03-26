@@ -10,7 +10,7 @@ import {
   buildSystemPrompt,
   buildUserMessage,
   inspectAiInput,
-  inspectAiOutput,
+  sanitizeAiOutput,
   sanitizeBoardStyle,
 } from './guard.ts';
 
@@ -157,24 +157,11 @@ Deno.serve(async (req) => {
   const mmData = await mmRes.json();
   const rawOutput: string = mmData?.choices?.[0]?.message?.content ?? '';
 
-  const outputInspection = inspectAiOutput(
-    rawOutput,
-    validMode,
-    inputInspection.normalized.length,
-  );
+  const result = sanitizeAiOutput(rawOutput);
 
-  if (outputInspection.blocked) {
-    console.warn('ai-assist blocked output', {
-      userId: user.id,
-      mode: validMode,
-      reason: outputInspection.reason,
-      length: outputInspection.normalized.length,
-    });
-
-    return jsonResponse(502, {
-      error: 'AI 응답이 올바르지 않습니다. 다시 시도해주세요.',
-    });
+  if (!result) {
+    return jsonResponse(502, { error: 'AI 요청에 실패했습니다. 잠시 후 다시 시도해주세요.' });
   }
 
-  return jsonResponse(200, { result: outputInspection.normalized });
+  return jsonResponse(200, { result });
 });
