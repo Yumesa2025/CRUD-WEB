@@ -151,6 +151,7 @@ Deno.serve(async (req) => {
     console.error(`OpenAI API error (${mmRes.status}):`, errText);
     return jsonResponse(502, {
       error: 'AI 요청에 실패했습니다. 잠시 후 다시 시도해주세요.',
+      _debug: mmRes.status,
     });
   }
 

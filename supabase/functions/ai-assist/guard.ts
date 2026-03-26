@@ -83,6 +83,7 @@ export function sanitizeAiOutput(rawOutput: string): string {
   return normalizeAiText(
     rawOutput
       .replace(/<think>[\s\S]*?<\/think>/gi, ' ')
+      .replace(/<\/?text>/gi, '')
       .replace(HANJA_PATTERN, '')
       .replace(JAPANESE_PATTERN, '')
       .replace(/\s{2,}/g, ' '),

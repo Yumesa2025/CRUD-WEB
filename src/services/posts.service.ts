@@ -83,7 +83,7 @@ export async function searchPosts(
     supabase
       .from('posts')
       .select(select)
-      .textSearch('fts', query, { type: 'websearch', config: 'simple' })
+      .or(`title.ilike.%${query}%,content.ilike.%${query}%`)
       .order('created_at', { ascending: false })
       .range(from, to),
   );
