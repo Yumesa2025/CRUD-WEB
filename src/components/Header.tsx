@@ -1,4 +1,4 @@
-import { Link, useNavigate } from '@tanstack/react-router';
+import { Link, useNavigate, useRouterState } from '@tanstack/react-router';
 import { Bookmark, LogIn, LogOut, PenLine } from 'lucide-react';
 import { css } from 'styled-system/css';
 import { useAuth } from '@/hooks/useAuth';
@@ -61,6 +61,8 @@ function UserAvatar({ userId }: { userId: string }) {
 export function Header() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isEditing = pathname === '/posts/new' || pathname.endsWith('/edit');
 
   const handleSignOut = async () => {
     await signOut();
@@ -103,50 +105,54 @@ export function Header() {
         </Link>
 
         <nav className={css({ display: 'flex', gap: '2', alignItems: 'center' })}>
-          <SearchBar />
+          {!isEditing && <SearchBar />}
           {user ? (
             <>
-              <Link
-                to="/posts/new"
-                className={css({
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '1',
-                  px: '4',
-                  py: '2',
-                  bg: 'brand.500',
-                  color: 'white',
-                  borderRadius: 'md',
-                  textDecoration: 'none',
-                  fontSize: 'sm',
-                  fontWeight: 'medium',
-                  _hover: { bg: 'brand.600' },
-                })}
-              >
-                <PenLine size={15} />
-                글쓰기
-              </Link>
+              {!isEditing && (
+                <Link
+                  to="/posts/new"
+                  className={css({
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '1',
+                    px: '4',
+                    py: '2',
+                    bg: 'brand.500',
+                    color: 'white',
+                    borderRadius: 'md',
+                    textDecoration: 'none',
+                    fontSize: 'sm',
+                    fontWeight: 'medium',
+                    _hover: { bg: 'brand.600' },
+                  })}
+                >
+                  <PenLine size={15} />
+                  글쓰기
+                </Link>
+              )}
 
-              <Link
-                to="/bookmarks"
-                className={css({
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '1',
-                  px: '3',
-                  py: '2',
-                  border: '1px solid token(colors.brand.100)',
-                  color: 'brand.600',
-                  borderRadius: 'md',
-                  textDecoration: 'none',
-                  fontSize: 'sm',
-                  fontWeight: 'medium',
-                  _hover: { bg: 'brand.50' },
-                })}
-              >
-                <Bookmark size={15} />
-                저장
-              </Link>
+              {!isEditing && (
+                <Link
+                  to="/bookmarks"
+                  className={css({
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '1',
+                    px: '3',
+                    py: '2',
+                    border: '1px solid token(colors.brand.100)',
+                    color: 'brand.600',
+                    borderRadius: 'md',
+                    textDecoration: 'none',
+                    fontSize: 'sm',
+                    fontWeight: 'medium',
+                    _hover: { bg: 'brand.50' },
+                  })}
+                >
+                  <Bookmark size={15} />
+                  저장
+                </Link>
+              )}
 
               <UserAvatar userId={user.id} />
 
